@@ -12,8 +12,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: 'Student Fee Manager',
   description: 'Month-wise Student Fee Management System',
-  generator: 'v0.app',
-  icons: {
+ /* icons: {
     icon: [
       {
         url: '/icon-light-32x32.png',
@@ -29,7 +28,7 @@ export const metadata: Metadata = {
       },
     ],
     apple: '/apple-icon.png',
-  },
+  },*/
 }
 
 export default function RootLayout({
