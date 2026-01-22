@@ -1,5 +1,14 @@
-import type { Student } from "./student-store"
-import type { Month } from "./month-context"
+import type { Month } from "@/lib/month-context"
+
+export type Student = {
+  studentId: string
+  name: string
+  guardianName: string
+  class: string
+  section: string
+  monthlyFee: number
+  feeStatus: Record<string, "paid" | "unpaid">
+}
 
 export function generateStudentBillPDF(student: Student, month: Month) {
   const paymentStatus = student.feeStatus[month]
