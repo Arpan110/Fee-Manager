@@ -31,7 +31,7 @@ function StudentDetailContent({ id }: { id: string }) {
 
   const handlePrintBill = () => {
     const billContent = billRef.current
-    if (!billContent) return
+    if (!billContent || !student) return
 
     const printWindow = window.open("", "_blank")
     if (!printWindow) return
@@ -134,7 +134,7 @@ function StudentDetailContent({ id }: { id: string }) {
 
   const handleDownloadPDF = () => {
     const billContent = billRef.current
-    if (!billContent) return
+    if (!billContent || !student) return
 
     const printWindow = window.open("", "_blank")
     if (!printWindow) return
