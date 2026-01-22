@@ -127,3 +127,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* minimal global styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
