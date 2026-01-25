@@ -14,6 +14,34 @@ interface Payment {
   amount: number
 }
 
+/* 🔢 Number → Words */
+function numberToWords(num: number): string {
+  if (num === 0) return "Zero"
+
+  const a = [
+    "", "One", "Two", "Three", "Four", "Five", "Six",
+    "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
+    "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+    "Seventeen", "Eighteen", "Nineteen"
+  ]
+
+  const b = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"]
+
+  const inWords = (n: number): string => {
+    if (n < 20) return a[n]
+    if (n < 100) return b[Math.floor(n / 10)] + (n % 10 ? " " + a[n % 10] : "")
+    if (n < 1000)
+      return a[Math.floor(n / 100)] + " Hundred" + (n % 100 ? " " + inWords(n % 100) : "")
+    if (n < 100000)
+      return inWords(Math.floor(n / 1000)) + " Thousand" + (n % 1000 ? " " + inWords(n % 1000) : "")
+    if (n < 10000000)
+      return inWords(Math.floor(n / 100000)) + " Lakh" + (n % 100000 ? " " + inWords(n % 100000) : "")
+    return ""
+  }
+
+  return inWords(num)
+}
+
 export default function ReceiptPage() {
   const params = useParams()
   const studentId = params.studentId as string
@@ -60,37 +88,22 @@ export default function ReceiptPage() {
 
   const status = paid ? "paid" : "unpaid"
 
-  // ✅ CORRECT PRINT → PDF FUNCTION
+  /* 🖨 PRINT → SAVE AS PDF */
   const handleDownloadPDF = () => {
     if (!billRef.current) return
 
-    // clone bill only
     const clone = billRef.current.cloneNode(true) as HTMLElement
-
-    // remove watermark/background
     clone.querySelectorAll(".bill-watermark").forEach((el) => el.remove())
 
-    const printWindow = window.open("", "_blank")
-    if (!printWindow) {
-      alert("Popup blocked")
-      return
-    }
+    const win = window.open("", "_blank")
+    if (!win) return alert("Popup blocked")
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
+    win.document.write(`
       <html>
         <head>
           <title>Fee Receipt</title>
-
-          <!-- ✅ Tailwind CDN (VERY IMPORTANT) -->
           <script src="https://cdn.tailwindcss.com"></script>
-
-          <style>
-            body {
-              background: white;
-              padding: 30px;
-            }
-          </style>
+          <style>body{background:white;padding:30px}</style>
         </head>
         <body>
           ${clone.outerHTML}
@@ -98,11 +111,10 @@ export default function ReceiptPage() {
       </html>
     `)
 
-    printWindow.document.close()
-
-    printWindow.onload = () => {
-      printWindow.focus()
-      printWindow.print()
+    win.document.close()
+    win.onload = () => {
+      win.focus()
+      win.print()
     }
   }
 
@@ -129,6 +141,7 @@ export default function ReceiptPage() {
           student={student}
           month={selectedMonth as any}
           status={status}
+          amountInWords={numberToWords(student.monthlyFee)}
         />
       </div>
     </div>

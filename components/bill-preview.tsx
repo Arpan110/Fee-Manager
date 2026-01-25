@@ -4,51 +4,24 @@ import { forwardRef } from "react"
 import Image from "next/image"
 import type { Student } from "@/lib/student-store"
 import type { Month } from "@/lib/month-context"
-import { Badge } from "@/components/ui/badge"
-
-/* ================= PRINT OVERRIDE ================= */
-
-const PrintStyles = () => (
-  <style jsx global>{`
-    @media print {
-
-      body {
-        background: white !important;
-      }
-
-      /* ❌ FORCE REMOVE watermark / scribble / background */
-      .bill-watermark {
-        display: none !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-      }
-
-      /* ✅ clean official receipt look */
-      .bill-root {
-        border: 2px solid #3b82f6 !important;
-        box-shadow: none !important;
-        background: white !important;
-        max-width: 800px !important;
-        padding: 32px !important;
-      }
-    }
-  `}</style>
-)
-
-/* ================= TYPES ================= */
 
 interface BillPreviewProps {
   student: Student
   month: Month
   status: "paid" | "unpaid"
   receiptNo?: string
+  amountInWords?: string
 }
-
-/* ================= COMPONENT ================= */
 
 export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
   function BillPreview(
-    { student, month, status, receiptNo = `RCP${Date.now()}` },
+    {
+      student,
+      month,
+      status,
+      receiptNo = `RCP-${Date.now()}`,
+      amountInWords = "",
+    },
     ref
   ) {
     const currentDate = new Date().toLocaleDateString("en-IN", {
@@ -58,141 +31,149 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
     })
 
     return (
-      <>
-        <PrintStyles />
-
-        <div
-          ref={ref}
-          className="bill-root relative mx-auto w-full max-w-lg overflow-hidden rounded-lg border-2 border-primary/30 bg-white p-6 font-sans"
-        >
-          {/* ❌ WATERMARK (SCREEN ONLY) */}
-          <div className="bill-watermark pointer-events-none absolute inset-0 flex items-center justify-center opacity-5">
-            <div className="relative h-48 w-48">
-              <Image
-                src="/logo.png"
-                alt="School Logo Watermark"
-                fill
-                className="object-contain opacity-30"
-              />
-            </div>
+      <div
+        ref={ref}
+        className="relative mx-auto w-full max-w-3xl bg-white px-10 py-8 text-[13px] text-black"
+      >
+        {/* 🌫 WATERMARK */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.06]">
+          <div className="relative h-[420px] w-[420px]">
+            <Image
+              src="/logo.png"
+              alt="Watermark"
+              fill
+              className="object-contain"
+            />
           </div>
+        </div>
 
-          {/* ✅ CLEAN RECEIPT CONTENT */}
-          <div className="relative z-10">
-            {/* Header */}
-            <div className="mb-6 border-b-2 border-primary/20 pb-4 text-center">
-              <h1 className="text-2xl font-bold text-primary">
-                Vivek Vikas Mission School
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                KHIRI * KOTULPUR * BANKURA * PIN - 722141
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Phone: +91 8777393801
-              </p>
-            </div>
+        <div className="relative z-10">
 
-            {/* Title */}
-            <div className="mb-6 text-center">
-              <h2 className="inline-block rounded bg-primary/10 px-4 py-1 text-lg font-semibold text-primary">
-                FEE RECEIPT
-              </h2>
-            </div>
-
-            {/* Meta */}
-            <div className="mb-6 flex justify-between text-sm">
-              <div>
-                <span className="text-muted-foreground">Receipt No:</span>{" "}
-                <span className="font-medium">{receiptNo}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Date:</span>{" "}
-                <span className="font-medium">{currentDate}</span>
-              </div>
-            </div>
-
-            {/* Student Info */}
-            <div className="mb-6 space-y-2 rounded-lg bg-muted/50 p-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Received from:</span>{" "}
-                <span className="font-semibold">{student.name}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Guardian:</span>{" "}
-                <span className="font-medium">{student.guardian}</span>
-              </div>
-              <div className="flex gap-4">
-                <div>
-                  <span className="text-muted-foreground">Class:</span>{" "}
-                  <span className="font-medium">{student.className}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Roll/ID:</span>{" "}
-                  <span className="font-medium">{student.studentId}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Table */}
-            <table className="w-full text-sm border-collapse mb-6">
-              <thead>
-                <tr className="border-b-2 border-primary/20">
-                  <th className="py-2 text-left">Description</th>
-                  <th className="py-2 text-center">Month</th>
-                  <th className="py-2 text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="py-3">Monthly / Tuition Fee</td>
-                  <td className="py-3 text-center">{month}</td>
-                  <td className="py-3 text-right">
-                    Rs. {student.monthlyFee.toLocaleString("en-IN")}
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr className="border-t-2 font-bold">
-                  <td colSpan={2} className="py-3">
-                    Total
-                  </td>
-                  <td className="py-3 text-right text-primary">
-                    Rs. {student.monthlyFee.toLocaleString("en-IN")}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-
-            {/* Status */}
-            <div className="mb-6 flex justify-center">
-              <Badge className="bg-green-600 text-white px-6 py-2 text-lg">
-                {status === "paid" ? "PAID" : "UNPAID"}
-              </Badge>
-            </div>
-
-            {/* Signature */}
-            <div className="mt-8 border-t border-dashed pt-6 text-center">
-              <div className="relative mx-auto mb-2 h-12 w-32">
+          {/* 🔝 HEADER */}
+          <div className="flex justify-center border-b-2 border-blue-800 pb-3">
+            <div className="flex items-center gap-4">
+              <div className="relative h-16 w-16">
                 <Image
-                  src="/signature.png"
-                  alt="Receiver's signature"
+                  src="/logo.png"
+                  alt="Logo"
                   fill
                   className="object-contain"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Receiver's Signature
-              </p>
-            </div>
 
-            {/* Footer */}
-            <div className="mt-6 border-t pt-4 text-center text-xs text-muted-foreground">
-              <p>This is a computer-generated receipt.</p>
-              <p>Thank you for your payment.</p>
+              <div className="text-left leading-tight">
+                <h1 className="text-xl font-bold text-blue-900">
+                  VIVEK VIKAS MISSION SCHOOL
+                </h1>
+                <p className="text-[11px] text-gray-700 text-center">
+                  KHIRI * KOTULPUR * BANKURA * PIN - 722141
+                </p>
+                <p className="text-[11px] text-gray-700 text-center">
+                  Phone: 8777393801
+                </p>
+              </div>
             </div>
           </div>
+
+          {/* TITLE */}
+          <div className="mt-4 bg-blue-50 py-2 text-center font-semibold text-blue-900">
+            FEE RECEIPT
+          </div>
+
+          {/* META */}
+          <div className="mt-3 flex justify-between text-[12px]">
+            <p><b>Receipt No:</b> {receiptNo}</p>
+            <p><b>Date:</b> {currentDate}</p>
+          </div>
+
+          {/* STUDENT DETAILS */}
+          <div className="mt-4 border-t pt-2">
+            <p className="mb-2 font-semibold text-blue-900">STUDENT DETAILS</p>
+            <div className="grid grid-cols-2 gap-y-1 text-[12px]">
+              <p><b>Received from:</b></p><p className="text-end">{student.name}</p>
+              <p><b>S/O, D/O:</b></p><p className="text-end">{student.guardian}</p>
+              <p><b>Class:</b></p><p className="text-end">{student.className}</p>
+              <p><b>Section:</b></p><p className="text-end">{student.section}</p>
+              <p><b>Roll / ID:</b></p><p className="text-end">{student.studentId}</p>
+            </div>
+          </div>
+
+          {/* FEE DETAILS */}
+          <div className="mt-5 border-t pt-2">
+            <p className="mb-2 font-semibold text-blue-900">FEE DETAILS</p>
+
+            <table className="w-full border border-gray-400 text-[12px]">
+              <thead className="bg-blue-50">
+                <tr>
+                  <th className="border px-2 py-1 text-left">Description</th>
+                  <th className="border px-2 py-1 text-center">Month</th>
+                  <th className="border px-2 py-1 text-right">Amount (Rs.)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border px-2 py-1">Fees</td>
+                  <td className="border px-2 py-1 text-center">{month}</td>
+                  <td className="border px-2 py-1 text-right">
+                    {student.monthlyFee.toLocaleString("en-IN")}
+                  </td>
+                </tr>
+
+                <tr className="bg-blue-50 font-semibold">
+                  <td className="border px-2 py-1" colSpan={2}>Total</td>
+                  <td className="border px-2 py-1 text-right">
+                    {student.monthlyFee.toLocaleString("en-IN")}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="border px-2 py-1 font-semibold text-blue-900"
+                  >
+                    Amount in Words: {amountInWords} Only
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* PAYMENT STATUS */}
+          <div className="mt-52 flex justify-center">
+            <div
+              className={
+                status === "paid"
+                  ? "rounded border border-green-600 bg-green-100 px-8 py-3 font-bold text-green-800 text-sm"
+                  : "rounded border border-red-600 bg-red-100 px-8 py-3 font-bold text-red-800 text-sm"
+              }
+            >
+              {status === "paid" ? "PAYMENT RECEIVED" : "PAYMENT PENDING"}
+            </div>
+          </div>
+
+          {/* SIGNATURE */}
+          <div className="mt-12 flex justify-end">
+            <div className="text-center">
+              <div className="relative h-12 w-32">
+                <Image
+                  src="/signature.png"
+                  alt="Signature"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <p className="mt-1 text-[11px]">Receiver's Signature</p>
+            </div>
+          </div>
+
+          {/* FOOTER */}
+          <div className="mt-6 border-t pt-2 text-center text-[11px] text-gray-600">
+            <p>This is a computer-generated receipt. No signature required.</p>
+            <p>Thank you for your payment</p>
+          </div>
+
         </div>
-      </>
+      </div>
     )
   }
 )
