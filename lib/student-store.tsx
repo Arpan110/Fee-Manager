@@ -1,303 +1,216 @@
 "use client"
 
-import { useEffect } from "react"
-
 import {
   createContext,
   useContext,
   useState,
   useCallback,
+  useEffect,
   type ReactNode,
 } from "react"
 import type { Month } from "./month-context"
 
+/* ===================== TYPES ===================== */
+
 export interface Student {
-  id: string
+  _id: string
   name: string
   studentId: string
-  class: string
+  className: string
   section: string
   phone: string
-  guardianName: string
+  guardian: string
   monthlyFee: number
-  feeStatus: Record<Month, "paid" | "unpaid">
   isDeleted: boolean
+}
+
+export interface Payment {
+  _id: string
+  studentId: string
+  month: string
+  year: number
+  status: "PAID" | "UNPAID"
+  amount: number
+  paidAt?: string
 }
 
 interface StudentStore {
   students: Student[]
-  addStudent: (student: Omit<Student, "id" | "feeStatus" | "isDeleted">) => void
-  deleteStudent: (id: string) => void
-  togglePaymentStatus: (id: string, month: Month) => void
+  paymentsMap: Record<string, Payment[]>
+
+  addStudent: (student: Omit<Student, "_id" | "isDeleted">) => Promise<void>
+  deleteStudent: (id: string) => Promise<void>
+
+  togglePaymentStatus: (
+    studentId: string,
+    month: Month,
+    amount: number
+  ) => Promise<void>
+
   getStudentById: (id: string) => Student | undefined
   getActiveStudents: () => Student[]
-  getStudentStats: (month: Month) => { total: number; paid: number; unpaid: number }
-  isHydrated: boolean
+  getStudentStats: (month: Month) => {
+    total: number
+    paid: number
+    unpaid: number
+  }
 }
+
+/* ===================== CONTEXT ===================== */
 
 const StudentStoreContext = createContext<StudentStore | null>(null)
 
-// Initial mock data
-const initialStudents: Student[] = [
-  {
-    id: "1",
-    name: "Rahul Sharma",
-    studentId: "STU001",
-    class: "Class 10",
-    section: "A",
-    phone: "9876543210",
-    guardianName: "Rajesh Sharma",
-    monthlyFee: 2500,
-    isDeleted: false,
-    feeStatus: {
-      January: "paid",
-      February: "paid",
-      March: "paid",
-      April: "unpaid",
-      May: "unpaid",
-      June: "unpaid",
-      July: "unpaid",
-      August: "unpaid",
-      September: "unpaid",
-      October: "unpaid",
-      November: "unpaid",
-      December: "unpaid",
-    },
-  },
-  {
-    id: "2",
-    name: "Priya Patel",
-    studentId: "STU002",
-    class: "Class 9",
-    section: "B",
-    phone: "9876543211",
-    guardianName: "Amit Patel",
-    monthlyFee: 2200,
-    isDeleted: false,
-    feeStatus: {
-      January: "paid",
-      February: "paid",
-      March: "paid",
-      April: "paid",
-      May: "unpaid",
-      June: "unpaid",
-      July: "unpaid",
-      August: "unpaid",
-      September: "unpaid",
-      October: "unpaid",
-      November: "unpaid",
-      December: "unpaid",
-    },
-  },
-  {
-    id: "3",
-    name: "Amit Kumar",
-    studentId: "STU003",
-    class: "Class 8",
-    section: "A",
-    phone: "9876543212",
-    guardianName: "Suresh Kumar",
-    monthlyFee: 2000,
-    isDeleted: false,
-    feeStatus: {
-      January: "paid",
-      February: "unpaid",
-      March: "unpaid",
-      April: "unpaid",
-      May: "unpaid",
-      June: "unpaid",
-      July: "unpaid",
-      August: "unpaid",
-      September: "unpaid",
-      October: "unpaid",
-      November: "unpaid",
-      December: "unpaid",
-    },
-  },
-  {
-    id: "4",
-    name: "Sneha Gupta",
-    studentId: "STU004",
-    class: "Class 10",
-    section: "C",
-    phone: "9876543213",
-    guardianName: "Vijay Gupta",
-    monthlyFee: 2500,
-    isDeleted: false,
-    feeStatus: {
-      January: "paid",
-      February: "paid",
-      March: "paid",
-      April: "paid",
-      May: "paid",
-      June: "unpaid",
-      July: "unpaid",
-      August: "unpaid",
-      September: "unpaid",
-      October: "unpaid",
-      November: "unpaid",
-      December: "unpaid",
-    },
-  },
-  {
-    id: "5",
-    name: "Ravi Singh",
-    studentId: "STU005",
-    class: "Class 7",
-    section: "B",
-    phone: "9876543214",
-    guardianName: "Deepak Singh",
-    monthlyFee: 1800,
-    isDeleted: false,
-    feeStatus: {
-      January: "unpaid",
-      February: "unpaid",
-      March: "unpaid",
-      April: "unpaid",
-      May: "unpaid",
-      June: "unpaid",
-      July: "unpaid",
-      August: "unpaid",
-      September: "unpaid",
-      October: "unpaid",
-      November: "unpaid",
-      December: "unpaid",
-    },
-  },
-]
-
-function getInitialStudents(): Student[] {
-  if (typeof window === "undefined") {
-    return initialStudents
-  }
-  
-  const stored = localStorage.getItem("students")
-  if (stored) {
-    try {
-      return JSON.parse(stored)
-    } catch {
-      return initialStudents
-    }
-  }
-  return initialStudents
-}
+/* ===================== PROVIDER ===================== */
 
 export function StudentStoreProvider({ children }: { children: ReactNode }) {
-  // Initialize with localStorage data or mock data immediately
-  const [students, setStudents] = useState<Student[]>(() => getInitialStudents())
-  const [isHydrated, setIsHydrated] = useState(false)
+  const [students, setStudents] = useState<Student[]>([])
+  const [paymentsMap, setPaymentsMap] = useState<Record<string, Payment[]>>({})
 
-  // Mark as hydrated after first render (client-side only)
-  useEffect(() => {
-    setIsHydrated(true)
-  }, [])
+  /* ---------- FETCH PAYMENTS FOR ONE STUDENT ---------- */
+  const fetchPaymentsForStudent = useCallback(async (studentId: string) => {
+    try {
+      const res = await fetch(`/api/payments/${studentId}`)
+      const data = await res.json()
 
-  // Save to localStorage whenever students change (only on client)
-  useEffect(() => {
-    if (typeof window !== "undefined" && isHydrated) {
-      localStorage.setItem("students", JSON.stringify(students))
+      setPaymentsMap((prev) => ({
+        ...prev,
+        [studentId]: data,
+      }))
+    } catch (err) {
+      console.error("Failed to fetch payments", err)
     }
-  }, [students, isHydrated])
-
-  const updateStudents = useCallback((newStudents: Student[]) => {
-    setStudents(newStudents)
   }, [])
 
+  /* ---------- FETCH STUDENTS ---------- */
+  const fetchStudents = useCallback(async () => {
+    try {
+      const res = await fetch("/api/students")
+      const data = await res.json()
+
+      setStudents(data)
+
+      // load payments for each student
+      data.forEach((s: Student) => {
+        fetchPaymentsForStudent(s._id)
+      })
+    } catch (err) {
+      console.error("Failed to fetch students", err)
+    }
+  }, [fetchPaymentsForStudent])
+
+  useEffect(() => {
+    fetchStudents()
+  }, [fetchStudents])
+
+  /* ---------- ADD STUDENT ---------- */
   const addStudent = useCallback(
-    (studentData: Omit<Student, "id" | "feeStatus" | "isDeleted">) => {
-      const newStudent: Student = {
-        ...studentData,
-        id: `${Date.now()}`,
-        isDeleted: false,
-        feeStatus: {
-          January: "unpaid",
-          February: "unpaid",
-          March: "unpaid",
-          April: "unpaid",
-          May: "unpaid",
-          June: "unpaid",
-          July: "unpaid",
-          August: "unpaid",
-          September: "unpaid",
-          October: "unpaid",
-          November: "unpaid",
-          December: "unpaid",
-        },
+    async (studentData: Omit<Student, "_id" | "isDeleted">) => {
+      try {
+        await fetch("/api/students", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(studentData),
+        })
+
+        await fetchStudents()
+      } catch (err) {
+        console.error("Add student failed", err)
       }
-      updateStudents([...students, newStudent])
     },
-    [students, updateStudents]
+    [fetchStudents]
   )
 
+  /* ---------- DELETE STUDENT ---------- */
   const deleteStudent = useCallback(
-    (id: string) => {
-      updateStudents(
-        students.map((student) =>
-          student.id === id ? { ...student, isDeleted: true } : student
-        )
-      )
+    async (id: string) => {
+      try {
+        await fetch(`/api/students/${id}`, { method: "DELETE" })
+        await fetchStudents()
+      } catch (err) {
+        console.error("Delete failed", err)
+      }
     },
-    [students, updateStudents]
+    [fetchStudents]
   )
 
+  /* ---------- REAL PAYMENT TOGGLE ---------- */
   const togglePaymentStatus = useCallback(
-    (id: string, month: Month) => {
-      updateStudents(
-        students.map((student) =>
-          student.id === id
-            ? {
-                ...student,
-                feeStatus: {
-                  ...student.feeStatus,
-                  [month]: student.feeStatus[month] === "paid" ? "unpaid" : "paid",
-                },
-              }
-            : student
-        )
-      )
+    async (studentId: string, month: Month, amount: number) => {
+      try {
+        await fetch(`/api/payments/${studentId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            month,
+            year: new Date().getFullYear(),
+            amount,
+            status: "PAID",
+          }),
+        })
+
+        // refresh payments
+        await fetchPaymentsForStudent(studentId)
+      } catch (err) {
+        console.error("Payment toggle failed", err)
+      }
     },
-    [students, updateStudents]
+    [fetchPaymentsForStudent]
   )
 
+  /* ---------- HELPERS ---------- */
   const getStudentById = useCallback(
-    (id: string) => {
-      return students.find((s) => s.id === id && !s.isDeleted)
-    },
+    (id: string) => students.find((s) => s._id === id && !s.isDeleted),
     [students]
   )
 
-  const getActiveStudents = useCallback(() => {
-    return students.filter((s) => !s.isDeleted)
-  }, [students])
+  const getActiveStudents = useCallback(
+    () => students.filter((s) => !s.isDeleted),
+    [students]
+  )
 
   const getStudentStats = useCallback(
     (month: Month) => {
       const active = students.filter((s) => !s.isDeleted)
       const total = active.length
-      const paid = active.filter((s) => s.feeStatus[month] === "paid").length
-      const unpaid = total - paid
-      return { total, paid, unpaid }
+
+      let paid = 0
+
+      active.forEach((s) => {
+        const payments = paymentsMap[s._id] || []
+        const found = payments.find(
+          (p) =>
+            p.month === month &&
+            p.year === new Date().getFullYear() &&
+            p.status === "PAID"
+        )
+        if (found) paid++
+      })
+
+      return { total, paid, unpaid: total - paid }
     },
-    [students]
+    [students, paymentsMap]
   )
 
+  /* ---------- PROVIDER ---------- */
   return (
     <StudentStoreContext.Provider
       value={{
         students,
+        paymentsMap,
         addStudent,
         deleteStudent,
         togglePaymentStatus,
         getStudentById,
         getActiveStudents,
         getStudentStats,
-        isHydrated,
       }}
     >
       {children}
     </StudentStoreContext.Provider>
   )
 }
+
+/* ===================== HOOK ===================== */
 
 export function useStudentStore() {
   const context = useContext(StudentStoreContext)
