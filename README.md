@@ -88,8 +88,8 @@ Backend will run on:
 http://localhost:5000
 3️⃣ Frontend Setup
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 Frontend will run on:
 
 http://localhost:3000
@@ -159,8 +159,3 @@ Arpan Paul
 
 📄 License
 This project is for educational and school internal use.
-
-
-
-## 📁 Project Structure
-
