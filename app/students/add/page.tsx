@@ -8,7 +8,7 @@ export const metadata = {
 export default function AddStudentPage() {
   return (
     <AdminLayout title="Add New Student" showDownloadReport={false}>
-      <div className="space-y-6">
+      <div className="space-y-6 flex justify-center mt-30">
         <StudentForm />
       </div>
     </AdminLayout>

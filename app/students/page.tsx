@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, Suspense } from "react"
+import { useState, Suspense } from "react"
 import Link from "next/link"
 import { AdminLayout } from "@/components/admin-layout"
 import { StudentsTable } from "@/components/students-table"
@@ -14,134 +14,135 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { UserPlus, Search, FileDown, Printer, X } from "lucide-react"
+import { UserPlus, Search, FileDown, Printer } from "lucide-react"
+import Image from "next/image"
 import Loading from "./loading"
 
 /* ---------------- REPORT PREVIEW ---------------- */
 
-function MonthReportPreview({
-  students,
-  month,
-  onClose,
-  onPrint,
-}: {
-  students: {
-    name: string
-    studentId: string
-    class: string
-    section: string
-    phone: string
-    monthlyFee: number
-    status: string
-  }[]
-  month: string
-  onClose: () => void
-  onPrint: () => void
-}) {
-  const paidCount = students.filter((s) => s.status === "paid").length
-  const unpaidCount = students.filter((s) => s.status === "unpaid").length
+function MonthReportPreview({ students, month }: any) {
+  const paidStudents = students.filter((s: any) => s.status === "paid")
+  const unpaidStudents = students.filter((s: any) => s.status === "unpaid")
 
-  const totalCollection = students
-    .filter((s) => s.status === "paid")
-    .reduce((sum, s) => sum + s.monthlyFee, 0)
-
-  const pendingAmount = students
-    .filter((s) => s.status === "unpaid")
-    .reduce((sum, s) => sum + s.monthlyFee, 0)
+  const totalCollection = paidStudents.reduce(
+    (sum: number, s: any) => sum + s.monthlyFee,
+    0
+  )
 
   return (
-    <div className="flex flex-col">
-      <div id="report-content" className="flex-1 overflow-y-auto bg-white p-6 print:p-0">
-        <div className="mb-6 border-b-2 border-primary pb-4 text-center">
-          <h1 className="text-2xl font-bold text-primary">
-            Vivek Vikas Mission School
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            KHIRI * KOTULPUR * BANKURA * PIN - 722141
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Phone: +91 8777393801
-          </p>
+    <div className="flex h-full flex-col">
+      {/* BODY */}
+      <div
+        id="report-content"
+        className="relative flex-1 bg-white p-8 overflow-y-auto print:overflow-visible"
+      >
+        {/* WATERMARK */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-5">
+          <Image src="/logo.png" alt="logo" width={350} height={350} />
         </div>
 
-        <div className="mb-6 text-center">
-          <h2 className="text-xl font-semibold text-foreground">
-            MONTHLY FEE COLLECTION REPORT
-          </h2>
-          <p className="text-lg font-medium text-primary">{month}</p>
-          <p className="text-sm text-muted-foreground">
-            Generated on:{" "}
-            {new Date().toLocaleDateString("en-IN", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
-        </div>
+        <div className="relative z-10">
 
-        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="rounded-lg border p-3 text-center">
-            <p className="text-sm text-muted-foreground">Total Students</p>
-            <p className="text-2xl font-bold">{students.length}</p>
+          {/* HEADER */}
+          <div className="mb-6 border-b-2 border-blue-800 pb-4 text-center">
+            <div className="flex items-center justify-center gap-3">
+              <Image src="/logo.png" alt="logo" width={70} height={70} />
+              <div>
+                <h1 className="text-2xl font-bold text-blue-900">
+                  Vivek Vikas Mission School
+                </h1>
+                <p className="text-sm text-gray-600">
+                  KHIRI • KOTULPUR • BANKURA • PIN - 722141
+                </p>
+                <p className="text-sm text-gray-600">Phone: 8777393801</p>
+              </div>
+            </div>
           </div>
-          <div className="rounded-lg border p-3 text-center">
-            <p className="text-sm text-muted-foreground">Paid</p>
-            <p className="text-2xl font-bold text-green-600">{paidCount}</p>
-          </div>
-          <div className="rounded-lg border p-3 text-center">
-            <p className="text-sm text-muted-foreground">Unpaid</p>
-            <p className="text-2xl font-bold text-red-600">{unpaidCount}</p>
-          </div>
-          <div className="rounded-lg border p-3 text-center">
-            <p className="text-sm text-muted-foreground">Collection</p>
-            <p className="text-xl font-bold text-primary">
-              ₹ {totalCollection.toLocaleString("en-IN")}
+
+          {/* TITLE */}
+          <div className="mb-6 text-center">
+            <h2 className="text-xl font-bold">MONTHLY FEE COLLECTION REPORT</h2>
+            <p className="font-semibold text-blue-700">{month}</p>
+            <p className="text-sm text-gray-500">
+              Date: {new Date().toLocaleDateString("en-IN")}
             </p>
           </div>
-        </div>
 
-        <div className="mb-6 overflow-x-auto">
-          <table className="w-full border-collapse border text-sm">
-            <thead>
-              <tr className="bg-muted/50">
-                <th className="border p-2">S.No</th>
-                <th className="border p-2">Name</th>
-                <th className="border p-2">ID</th>
-                <th className="border p-2">Class</th>
-                <th className="border p-2">Section</th>
-                <th className="border p-2 text-right">Fee</th>
-                <th className="border p-2 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((s, i) => (
-                <tr key={s.studentId}>
-                  <td className="border p-2">{i + 1}</td>
-                  <td className="border p-2">{s.name}</td>
-                  <td className="border p-2">{s.studentId}</td>
-                  <td className="border p-2">{s.class}</td>
-                  <td className="border p-2">{s.section}</td>
-                  <td className="border p-2 text-right">
-                    ₹ {s.monthlyFee.toLocaleString("en-IN")}
-                  </td>
-                  <td className="border p-2 text-center font-semibold text-red-600">
-                    {s.status.toUpperCase()}
-                  </td>
+          {/* STATS */}
+          <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <Stat title="Total Students" value={students.length} />
+            <Stat title="Paid" value={paidStudents.length} color="text-green-600" />
+            <Stat title="Unpaid" value={unpaidStudents.length} color="text-red-600" />
+            <Stat
+              title="Collection"
+              value={`₹ ${totalCollection.toLocaleString("en-IN")}`}
+              color="text-blue-700"
+            />
+          </div>
+
+          {/* ✅ SCREEN: scroll | PRINT: full table */}
+          <div className="border rounded-md max-h-[420px] overflow-y-auto print:max-h-full print:overflow-visible">
+            <table className="w-full border-collapse border text-sm">
+              <thead className="sticky top-0 bg-gray-100 print:static">
+                <tr>
+                  <th className="border p-2">S.No</th>
+                  <th className="border p-2">Name</th>
+                  <th className="border p-2">ID</th>
+                  <th className="border p-2">Class</th>
+                  <th className="border p-2">Section</th>
+                  <th className="border p-2 text-right">Fee</th>
+                  <th className="border p-2 text-center">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {students.map((s: any, i: number) => (
+                  <tr key={s.studentId} className="break-inside-avoid">
+                    <td className="border p-2">{i + 1}</td>
+                    <td className="border p-2">{s.name}</td>
+                    <td className="border p-2">{s.studentId}</td>
+                    <td className="border p-2">{s.class}</td>
+                    <td className="border p-2">{s.section}</td>
+                    <td className="border p-2 text-right">
+                      ₹ {s.monthlyFee.toLocaleString("en-IN")}
+                    </td>
+                    <td
+                      className={`border p-2 text-center font-bold ${
+                        s.status === "paid" ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
+                      {s.status.toUpperCase()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* SIGNATURE */}
+          <div className="mt-24 flex justify-end break-inside-avoid">
+            <div className="text-center">
+              <Image
+                src="/signature.png"
+                alt="signature"
+                width={150}
+                height={80}
+              />
+              <p className="mt-1 border-t pt-1 text-sm font-semibold">
+                Principal Signature
+              </p>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+  )
+}
 
-      <div className="flex justify-end gap-2 border-t px-6 py-4 print:hidden">
-        <Button variant="outline" onClick={onClose}>
-          <X className="mr-2 h-4 w-4" /> Close
-        </Button>
-        <Button onClick={onPrint}>
-          <Printer className="mr-2 h-4 w-4" /> Print Report
-        </Button>
-      </div>
+function Stat({ title, value, color = "" }: any) {
+  return (
+    <div className="rounded-lg border p-3 text-center">
+      <p className="text-sm text-muted-foreground">{title}</p>
+      <p className={`text-2xl font-bold ${color}`}>{value}</p>
     </div>
   )
 }
@@ -150,43 +151,76 @@ function MonthReportPreview({
 
 function StudentsContent() {
   const { selectedMonth } = useMonth()
-  const { getActiveStudents, deleteStudent } = useStudentStore()
+  const { getActiveStudents, deleteStudent, paymentsMap } = useStudentStore()
   const [searchQuery, setSearchQuery] = useState("")
   const [showReport, setShowReport] = useState(false)
-  const reportRef = useRef<HTMLDivElement>(null)
 
   const activeStudents = getActiveStudents()
 
   const filteredStudents = activeStudents.filter(
-    (student) =>
-      student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.phone.includes(searchQuery) ||
-      student.className.toLowerCase().includes(searchQuery.toLowerCase())
+    (s: any) =>
+      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.phone?.includes(searchQuery)
   )
 
-  const reportData = filteredStudents.map((s) => ({
-    name: s.name,
-    studentId: s.studentId,
-    class: s.className,
-    section: s.section,
-    phone: s.phone,
-    monthlyFee: s.monthlyFee,
-    status: "unpaid", // later from DB
-  }))
+  const currentYear = new Date().getFullYear()
 
+  const reportData = filteredStudents.map((s: any) => {
+    const payments = paymentsMap[s._id] || []
+    const paid = payments.find(
+      (p: any) =>
+        p.month === selectedMonth &&
+        p.year === currentYear &&
+        p.status === "PAID"
+    )
+
+    return {
+      name: s.name,
+      studentId: s.studentId,
+      class: s.className,
+      section: s.section,
+      monthlyFee: s.monthlyFee,
+      status: paid ? "paid" : "unpaid",
+    }
+  })
+
+  /* ✅ PERFECT PRINT */
   const handlePrintReport = () => {
     const printContent = document.getElementById("report-content")
     if (!printContent) return
+
     const win = window.open("", "_blank")
     if (!win) return
-    win.document.write(`<html><body>${printContent.innerHTML}</body></html>`)
+
+    win.document.write(`
+      <html>
+        <head>
+          <title>Monthly Report</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @media print {
+              * { overflow: visible !important; }
+              table { page-break-inside: auto; }
+              tr { page-break-inside: avoid; }
+              thead { display: table-header-group; }
+            }
+          </style>
+        </head>
+        <body>
+          ${printContent.innerHTML}
+        </body>
+      </html>
+    `)
+
     win.document.close()
-    win.print()
+    win.focus()
+    win.onload = () => win.print()
   }
 
   return (
     <div className="space-y-6">
+
       <div className="rounded-lg border p-4">
         Showing data for <b>{selectedMonth}</b>
       </div>
@@ -209,6 +243,7 @@ function StudentsContent() {
               Add Student
             </Link>
           </Button>
+
           <Button variant="outline" onClick={() => setShowReport(true)}>
             <FileDown className="mr-2 h-5 w-5" />
             Download Report
@@ -216,29 +251,26 @@ function StudentsContent() {
         </div>
       </div>
 
-      {/* ✅ FIXED TABLE USAGE */}
       <StudentsTable
         students={filteredStudents}
         selectedMonth={selectedMonth}
         onDeleteStudent={deleteStudent}
       />
 
+      {/* REPORT MODAL */}
       <Dialog open={showReport} onOpenChange={setShowReport}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
-          <DialogHeader className="border-b px-6 py-4">
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="border-b px-6 py-4 flex items-center justify-between">
             <DialogTitle className="text-xl text-primary">
-              Monthly Fee Report - {selectedMonth}
+              Monthly Report - {selectedMonth}
             </DialogTitle>
+
+            <Button size="sm" variant="outline" onClick={handlePrintReport}>
+              <Printer className="mr-2 h-4 w-4" /> Print
+            </Button>
           </DialogHeader>
 
-          <div ref={reportRef} className="flex-1 overflow-y-auto">
-            <MonthReportPreview
-              students={reportData}
-              month={selectedMonth}
-              onClose={() => setShowReport(false)}
-              onPrint={handlePrintReport}
-            />
-          </div>
+          <MonthReportPreview students={reportData} month={selectedMonth} />
         </DialogContent>
       </Dialog>
     </div>

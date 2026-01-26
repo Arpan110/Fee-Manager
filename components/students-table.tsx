@@ -42,15 +42,15 @@ export function StudentsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Student ID</TableHead>
-            <TableHead>Class</TableHead>
-            <TableHead>Section</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead className="text-right">Monthly Fee</TableHead>
-            <TableHead className="text-center">Status</TableHead>
-            <TableHead className="text-center">Bill</TableHead>
-            <TableHead className="text-center">Delete</TableHead>
+            <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Name</TableHead>
+            <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Roll No.</TableHead>
+            <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Class</TableHead>
+            <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Section</TableHead>
+            <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Phone</TableHead>
+            <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Monthly Fee</TableHead>
+            <TableHead className="text-center bg-[#0071df] text-gray-50 border-2 border-gray-50">Status</TableHead>
+            <TableHead className="text-center bg-[#0071df] text-gray-50 border-2 border-gray-50">Bill</TableHead>
+            <TableHead className="text-center bg-[#0071df] text-gray-50 border-2 border-gray-50">Delete</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -79,7 +79,7 @@ export function StudentsTable({
                   <TableCell>{student.className}</TableCell>
                   <TableCell>{student.section}</TableCell>
                   <TableCell>{student.phone}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="">
                     ₹ {student.monthlyFee.toLocaleString("en-IN")}
                   </TableCell>
 
@@ -98,8 +98,8 @@ export function StudentsTable({
                       }
                       className={
                         isPaid
-                          ? "border-green-600 text-green-700 bg-green-50"
-                          : "border-red-500 text-red-600 hover:bg-red-50"
+                          ? "border-green-600 text-green-700 bg-green-50 hover:cursor-pointer"
+                          : "border-red-500 text-red-600 hover:bg-red-50 hover:cursor-pointer"
                       }
                     >
                       {isPaid ? (
@@ -126,8 +126,8 @@ export function StudentsTable({
                         </Link>
                       </Button>
                     ) : (
-                      <span className="text-xs text-muted-foreground">
-                        Pay first
+                      <span className="text-sm text-red-600 font-semibold">
+                        Due
                       </span>
                     )}
                   </TableCell>
@@ -135,6 +135,7 @@ export function StudentsTable({
                   {/* 🗑 DELETE */}
                   <TableCell className="text-center">
                     <Button
+                    className="hover:cursor-pointer"
                       variant="destructive"
                       size="sm"
                       onClick={() => onDeleteStudent(student._id)}

@@ -119,10 +119,10 @@ export function StudentForm() {
     addStudent({
       name: formData.name,
       studentId: formData.studentId,
-      class: formData.class,
+      className: formData.class,
       section: formData.section,
       phone: formData.phone,
-      guardianName: formData.guardianName,
+      guardian: formData.guardianName,
       monthlyFee: Number(formData.monthlyFee),
     })
 
@@ -143,7 +143,7 @@ export function StudentForm() {
     <>
       {/* Success Message */}
       {showSuccess && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg border border-success/30 bg-success/10 p-4">
+        <div className="fixed top-10 left-4/7 z-50 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-success/30 bg-success/10 px-6 py-4 shadow-lg backdrop-blur">
           <CheckCircle className="h-6 w-6 text-success" />
           <p className="text-base font-medium text-success">
             Student added successfully! Redirecting...
@@ -151,13 +151,15 @@ export function StudentForm() {
         </div>
       )}
 
+
       {/* Error Message */}
       {error && (
-        <div className="mb-6 flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4">
+        <div className="fixed top-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-6 py-4 shadow-lg backdrop-blur">
           <AlertCircle className="h-6 w-6 text-destructive" />
           <p className="text-base font-medium text-destructive">{error}</p>
         </div>
       )}
+
 
       <Card className="max-w-2xl border-l-4 border-l-primary">
         <CardHeader className="border-b border-border">
@@ -180,7 +182,7 @@ export function StudentForm() {
                   required
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 ml-8">
                 <Label htmlFor="studentId" className="text-base">
                   Student ID / Roll <span className="text-destructive">*</span>
                 </Label>
@@ -211,7 +213,7 @@ export function StudentForm() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 ml-8">
                 <Label htmlFor="section" className="text-base">
                   Section <span className="text-destructive">*</span>
                 </Label>
@@ -243,7 +245,7 @@ export function StudentForm() {
                   required
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 ml-8">
                 <Label htmlFor="guardianName" className="text-base">
                   Guardian Name <span className="text-destructive">*</span>
                 </Label>
@@ -274,11 +276,7 @@ export function StudentForm() {
                 />
               </div>
             </div>
-            <div className="flex flex-wrap gap-4 border-t border-border pt-6">
-              <Button type="submit" size="lg" className="text-base" disabled={showSuccess}>
-                <Save className="mr-2 h-5 w-5" />
-                Save Student
-              </Button>
+            <div className="flex flex-wrap justify-between border-t border-border pt-6">
               <Button
                 type="button"
                 variant="outline"
@@ -288,6 +286,10 @@ export function StudentForm() {
               >
                 <ArrowLeft className="mr-2 h-5 w-5" />
                 Cancel
+              </Button>
+              <Button type="submit" size="lg" className="text-base" disabled={showSuccess}>
+                <Save className="mr-2 h-5 w-5" />
+                Save Student
               </Button>
             </div>
           </form>

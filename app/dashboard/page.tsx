@@ -1,125 +1,162 @@
 "use client"
 
 import { AdminLayout } from "@/components/admin-layout"
-import { useStudentStore } from "@/lib/student-store"
 import { useMonth } from "@/lib/month-context"
-import { Users, IndianRupee, AlertCircle, CheckCircle } from "lucide-react"
-import { Suspense } from "react"
+import { useStudentStore } from "@/lib/student-store"
 
-/* ---------------- STAT CARD ---------------- */
-
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-}: {
-  title: string
-  value: string | number
-  icon: any
-  color: string
-}) {
-  return (
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className="mt-2 text-2xl font-bold">{value}</p>
-        </div>
-        <div className={`rounded-full p-3 ${color}`}>
-          <Icon className="h-6 w-6 text-white" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ---------------- DASHBOARD CONTENT ---------------- */
-
-function DashboardContent() {
-  const { selectedMonth } = useMonth()
-  const { getActiveStudents } = useStudentStore()
-
-  const activeStudents = getActiveStudents()
-  const totalStudents = activeStudents.length
-
-  // ⏳ TEMP until STEP‑5 payment system
-  const paidStudents = 0
-  const unpaidStudents = totalStudents
-  const totalCollection = 0
-
-  const pendingAmount = activeStudents.reduce(
-    (sum, s) => sum + (s.monthlyFee || 0),
-    0
-  )
-
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview for <span className="font-semibold">{selectedMonth}</span>
-        </p>
-      </div>
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title="Total Students"
-          value={totalStudents}
-          icon={Users}
-          color="bg-blue-600"
-        />
-        <StatCard
-          title="Paid Students"
-          value={paidStudents}
-          icon={CheckCircle}
-          color="bg-green-600"
-        />
-        <StatCard
-          title="Unpaid Students"
-          value={unpaidStudents}
-          icon={AlertCircle}
-          color="bg-red-600"
-        />
-        <StatCard
-          title="Pending Amount"
-          value={`₹ ${pendingAmount.toLocaleString("en-IN")}`}
-          icon={IndianRupee}
-          color="bg-orange-600"
-        />
-      </div>
-
-      <div className="rounded-xl border bg-muted/30 p-6">
-        <h2 className="text-lg font-semibold mb-2">System Status</h2>
-        <ul className="list-disc list-inside text-muted-foreground space-y-1">
-          <li>Student data is now loaded from MongoDB</li>
-          <li>Add Student is connected to backend</li>
-          <li>Dashboard & Students are in sync</li>
-          <li>Payment system will be activated in next step</li>
-        </ul>
-      </div>
-    </div>
-  )
-}
-
-/* ---------------- PAGE ---------------- */
+import {
+  Users,
+  CheckCircle,
+  XCircle,
+  IndianRupee,
+} from "lucide-react"
 
 export default function DashboardPage() {
+  const { selectedMonth } = useMonth()
+  const { getActiveStudents, paymentsMap } = useStudentStore()
+
+  const students = getActiveStudents()
+  const currentYear = new Date().getFullYear()
+
+  let paidCount = 0
+  let unpaidCount = 0
+  let totalCollection = 0
+  let pendingAmount = 0
+
+  students.forEach((s) => {
+    const payments = paymentsMap[s._id] || []
+    const paid = payments.find(
+      (p) =>
+        p.month === selectedMonth &&
+        p.year === currentYear &&
+        p.status === "PAID"
+    )
+
+    if (paid) {
+      paidCount++
+      totalCollection += paid.amount
+    } else {
+      unpaidCount++
+      pendingAmount += s.monthlyFee
+    }
+  })
+
+  const collectionRate =
+    students.length === 0
+      ? 0
+      : Math.round((paidCount / students.length) * 100)
+
+  const avgFee =
+    students.length === 0
+      ? 0
+      : Math.round(
+        students.reduce((sum, s) => sum + s.monthlyFee, 0) / students.length
+      )
+
   return (
-    <AdminLayout title="Dashboard">
-      <Suspense fallback={<Loading />}>
-        <DashboardContent />
-      </Suspense>
+    <AdminLayout title="Dashboard" showMonthSelector>
+      <div className="space-y-6">
+
+        {/* MONTH BAR */}
+        <div className="rounded-lg border bg-blue-50 p-4 text-blue-900">
+          Viewing fee data for: <b>{selectedMonth}</b>
+        </div>
+
+        {/* TOP CARDS */}
+        <div className="grid text-green-600 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+          <Card title="Total Students" value={students.length} icon={Users} iconColor="text-red-600"/>
+
+          <Card
+            title="Paid This Month"
+            value={paidCount}
+            subtitle={`Fees received for ${selectedMonth}`}
+            icon={CheckCircle}
+            iconColor="text-green-600"
+          />
+
+          <Card
+            title="Unpaid This Month"
+            value={unpaidCount}
+            subtitle={`Pending fees for ${selectedMonth}`}
+            icon={XCircle}
+            iconColor="text-red-600"
+          />
+
+          <Card
+            title="Collection"
+            value={`Rs. ${totalCollection.toLocaleString("en-IN")}`}
+            subtitle={`Total collected in ${selectedMonth}`}
+            icon={IndianRupee}
+          />
+        </div>
+
+        {/* QUICK SUMMARY */}
+        <div className="rounded-xl border bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold">
+            Quick Summary - {selectedMonth}
+          </h2>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+
+            <div className="rounded-lg bg-gray-50 p-4">
+              <p className="text-sm text-muted-foreground">Collection Rate</p>
+              <p className="text-2xl font-bold text-blue-600">
+                {collectionRate}%
+              </p>
+            </div>
+
+            <div className="rounded-lg bg-gray-50 p-4">
+              <p className="text-sm text-muted-foreground">Pending Amount</p>
+              <p className="text-2xl font-bold text-red-600">
+                Rs. {pendingAmount.toLocaleString("en-IN")}
+              </p>
+            </div>
+
+            <div className="rounded-lg bg-gray-50 p-4">
+              <p className="text-sm text-muted-foreground">Average Fee</p>
+              <p className="text-2xl font-bold">
+                Rs. {avgFee.toLocaleString("en-IN")}
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
     </AdminLayout>
   )
 }
 
-/* ---------------- LOADING ---------------- */
+/* -------- SMALL CARD COMPONENT -------- */
 
-function Loading() {
+function Card({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  iconColor = "text-blue-600",
+}: {
+  title: string
+  value: any
+  subtitle?: string
+  icon: any
+  iconColor?: string
+}) {
   return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+    <div className="flex items-center justify-between rounded-xl border bg-white p-5">
+      <div>
+        <p className="text-sm text-muted-foreground">{title}</p>
+        <p className="mt-1 text-2xl font-bold">{value}</p>
+        {subtitle && (
+          <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
+        )}
+      </div>
+
+      <div
+        className={`flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 ${iconColor}`}
+      >
+        <Icon className="h-6 w-6" />
+      </div>
     </div>
   )
 }
