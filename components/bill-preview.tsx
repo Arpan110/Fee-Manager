@@ -93,8 +93,8 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
               <p><b>Received from:</b></p><p className="text-end">{student.name}</p>
               <p><b>S/O, D/O:</b></p><p className="text-end">{student.guardian}</p>
               <p><b>Class:</b></p><p className="text-end">{student.className}</p>
-              <p><b>Section:</b></p><p className="text-end">{student.section}</p>
-              <p><b>Roll / ID:</b></p><p className="text-end">{student.studentId}</p>
+              <p><b>Village:</b></p><p className="text-end">{student.village}</p>
+              <p><b>Roll No.:</b></p><p className="text-end">{student.studentId}</p>
             </div>
           </div>
 

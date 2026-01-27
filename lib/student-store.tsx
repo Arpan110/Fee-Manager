@@ -13,11 +13,12 @@ import type { Month } from "./month-context"
 /* ===================== TYPES ===================== */
 
 export interface Student {
+  
   _id: string
   name: string
   studentId: string
   className: string
-  section: string
+  village: string
   phone: string
   guardian: string
   monthlyFee: number

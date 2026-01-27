@@ -5,7 +5,7 @@ export type Student = {
   name: string
   guardianName: string
   class: string
-  section: string
+  village: string
   monthlyFee: number
   feeStatus: Record<string, "paid" | "unpaid">
 }
@@ -246,7 +246,7 @@ export function generateStudentBillPDF(student: Student, month: Month) {
               </div>
               <div class="info-row">
                 <span class="info-label">Section:</span>
-                <span class="info-value">${student.section}</span>
+                <span class="info-value">${student.village}</span>
               </div>
               <div class="info-row">
                 <span class="info-label">Roll / ID:</span>

@@ -4,7 +4,7 @@ export interface IStudent extends Document {
   name: string;
   studentId: string;
   className: string;
-  section: string;
+  village: string;
   phone: string;
   guardian: string;
   monthlyFee: number;
@@ -18,7 +18,7 @@ const StudentSchema: Schema<IStudent> = new Schema(
     name: { type: String, required: true },
     studentId: { type: String, required: true },
     className: { type: String, required: true },
-    section: { type: String, required: true },
+    village: { type: String, required: true },
     phone: { type: String, required: true },
     guardian: { type: String, required: true },
     monthlyFee: { type: Number, required: true },

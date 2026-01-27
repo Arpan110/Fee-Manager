@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       name: body.name,
       studentId: body.studentId,
       className: body.className || body.class,          // handles both
-      section: body.section,
+      village: body.village,
       phone: body.phone,
       guardian: body.guardian || body.guardianName,    // handles both
       monthlyFee: Number(body.monthlyFee),

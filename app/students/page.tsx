@@ -89,7 +89,7 @@ function MonthReportPreview({ students, month }: any) {
                   <th className="border p-2">Name</th>
                   <th className="border p-2">ID</th>
                   <th className="border p-2">Class</th>
-                  <th className="border p-2">Section</th>
+                  <th className="border p-2">Village</th>
                   <th className="border p-2 text-right">Fee</th>
                   <th className="border p-2 text-center">Status</th>
                 </tr>
@@ -101,7 +101,7 @@ function MonthReportPreview({ students, month }: any) {
                     <td className="border p-2">{s.name}</td>
                     <td className="border p-2">{s.studentId}</td>
                     <td className="border p-2">{s.class}</td>
-                    <td className="border p-2">{s.section}</td>
+                    <td className="border p-2">{s.village}</td>
                     <td className="border p-2 text-right">
                       ₹ {s.monthlyFee.toLocaleString("en-IN")}
                     </td>
@@ -179,7 +179,7 @@ function StudentsContent() {
       name: s.name,
       studentId: s.studentId,
       class: s.className,
-      section: s.section,
+      village: s.village,
       monthlyFee: s.monthlyFee,
       status: paid ? "paid" : "unpaid",
     }

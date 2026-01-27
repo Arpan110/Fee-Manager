@@ -116,7 +116,7 @@ body { font-family: Arial, sans-serif; }
 <p><b>Name:</b> ${student.name}</p>
 <p><b>Guardian:</b> ${student.guardian}</p>
 <p><b>Class:</b> ${student.className}</p>
-<p><b>Section:</b> ${student.section}</p>
+<p><b>Village:</b> ${student.village}</p>
 <p><b>ID:</b> ${student.studentId}</p>
 
 <h3>Fee Details</h3>

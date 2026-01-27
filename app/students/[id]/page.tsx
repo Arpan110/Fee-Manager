@@ -89,7 +89,7 @@ export default function StudentDetailPage() {
     { icon: User, label: "Name", value: student.name },
     { icon: Hash, label: "Student ID", value: student.studentId },
     { icon: GraduationCap, label: "Class", value: student.className },
-    { icon: GraduationCap, label: "Section", value: student.section },
+    { icon: GraduationCap, label: "Village", value: student.village },
     { icon: Phone, label: "Phone", value: student.phone },
     { icon: Users, label: "Guardian", value: student.guardian },
     {
@@ -185,7 +185,7 @@ export default function StudentDetailPage() {
                 {/* BASIC DETAILS */}
                 <div className="text-sm text-center space-y-1">
                   <p><b>Name:</b> {student.name}</p>
-                  <p><b>Class:</b> {student.className} {student.section}</p>
+                  <p><b>Class:</b> {student.className} {student.village}</p>
                   <p><b>Month:</b> {selectedMonth}</p>
                   <p><b>Amount:</b> Rs. {student.monthlyFee.toLocaleString("en-IN")}</p>
                 </div>

@@ -18,7 +18,7 @@ interface Student {
   name: string
   studentId: string
   className: string
-  section: string
+  village: string
   phone: string
   monthlyFee: number
 }
@@ -45,7 +45,7 @@ export function StudentsTable({
             <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Name</TableHead>
             <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Roll No.</TableHead>
             <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Class</TableHead>
-            <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Section</TableHead>
+            <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Village</TableHead>
             <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Phone</TableHead>
             <TableHead className="bg-[#0071df] text-gray-50 border-2 border-gray-50">Monthly Fee</TableHead>
             <TableHead className="text-center bg-[#0071df] text-gray-50 border-2 border-gray-50">Status</TableHead>
@@ -77,7 +77,7 @@ export function StudentsTable({
                   <TableCell className="font-medium">{student.name}</TableCell>
                   <TableCell>{student.studentId}</TableCell>
                   <TableCell>{student.className}</TableCell>
-                  <TableCell>{student.section}</TableCell>
+                  <TableCell>{student.village}</TableCell>
                   <TableCell>{student.phone}</TableCell>
                   <TableCell className="">
                     ₹ {student.monthlyFee.toLocaleString("en-IN")}
