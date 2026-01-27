@@ -1,54 +1,65 @@
-import { connectDB } from "@/lib/db";
-import Payment from "@/models/Payment";
-import { NextResponse } from "next/server";
-import mongoose from "mongoose";
+import { connectDB } from "@/lib/db"
+import Payment from "@/models/Payment"
+import { NextResponse } from "next/server"
+import mongoose from "mongoose"
 
 type Params = {
-  params: Promise<{ studentId: string }>;
-};
+  params: Promise<{ studentId: string }>
+}
+
+/* ================= GET PAYMENTS ================= */
 
 export async function GET(req: Request, { params }: Params) {
   try {
-    const { studentId } = await params;
+    const { studentId } = await params
 
-    await connectDB();
+    await connectDB()
 
     if (!mongoose.Types.ObjectId.isValid(studentId)) {
-      return NextResponse.json({ error: "Invalid studentId" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid studentId" }, { status: 400 })
     }
 
     const payments = await Payment.find({
       studentId: new mongoose.Types.ObjectId(studentId),
-    }).sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 })
 
-    return NextResponse.json(payments);
+    return NextResponse.json(payments)
   } catch (error) {
-    console.error("GET payments error:", error);
+    console.error("GET payments error:", error)
     return NextResponse.json(
       { error: "Failed to fetch payments" },
       { status: 500 }
-    );
+    )
   }
 }
 
+/* ================= CREATE PAYMENT ================= */
+
 export async function POST(req: Request, { params }: Params) {
   try {
-    const { studentId } = await params;
+    const { studentId } = await params
 
-    await connectDB();
+    await connectDB()
 
     if (!mongoose.Types.ObjectId.isValid(studentId)) {
-      return NextResponse.json({ error: "Invalid studentId" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid studentId" }, { status: 400 })
     }
 
-    const body = await req.json();
-    const { month, year, amount, status } = body;
+    const body = await req.json()
+    const { month, year, amount, status, paymentMode } = body
 
     if (!month || !year || !amount) {
       return NextResponse.json(
         { error: "month, year, amount are required" },
         { status: 400 }
-      );
+      )
+    }
+
+    if (!paymentMode || !["ONLINE", "CASH"].includes(paymentMode)) {
+      return NextResponse.json(
+        { error: "paymentMode must be ONLINE or CASH" },
+        { status: 400 }
+      )
     }
 
     const payment = await Payment.create({
@@ -57,15 +68,16 @@ export async function POST(req: Request, { params }: Params) {
       year,
       amount,
       status: status || "PAID",
-      ...(status === "PAID" && { paidAt: new Date() }),
-    });
+      paymentMode, // ✅ NEW FIELD
+      ...(status !== "UNPAID" && { paidAt: new Date() }),
+    })
 
-    return NextResponse.json(payment, { status: 201 });
+    return NextResponse.json(payment, { status: 201 })
   } catch (error) {
-    console.error("POST payment error:", error);
+    console.error("POST payment error:", error)
     return NextResponse.json(
       { error: "Failed to create payment" },
       { status: 500 }
-    );
+    )
   }
 }

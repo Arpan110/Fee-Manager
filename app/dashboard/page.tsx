@@ -9,6 +9,8 @@ import {
   CheckCircle,
   XCircle,
   IndianRupee,
+  CreditCard,
+  Wallet,
 } from "lucide-react"
 
 export default function DashboardPage() {
@@ -20,7 +22,12 @@ export default function DashboardPage() {
 
   let paidCount = 0
   let unpaidCount = 0
+  let onlineCount = 0
+  let cashCount = 0
+
   let totalCollection = 0
+  let onlineCollection = 0
+  let cashCollection = 0
   let pendingAmount = 0
 
   students.forEach((s) => {
@@ -35,6 +42,16 @@ export default function DashboardPage() {
     if (paid) {
       paidCount++
       totalCollection += paid.amount
+
+      if (paid.paymentMode === "ONLINE") {
+        onlineCount++
+        onlineCollection += paid.amount
+      }
+
+      if (paid.paymentMode === "CASH") {
+        cashCount++
+        cashCollection += paid.amount
+      }
     } else {
       unpaidCount++
       pendingAmount += s.monthlyFee
@@ -46,12 +63,18 @@ export default function DashboardPage() {
       ? 0
       : Math.round((paidCount / students.length) * 100)
 
+  const onlinePercent =
+    paidCount === 0 ? 0 : Math.round((onlineCount / paidCount) * 100)
+
+  const cashPercent =
+    paidCount === 0 ? 0 : Math.round((cashCount / paidCount) * 100)
+
   const avgFee =
     students.length === 0
       ? 0
       : Math.round(
-        students.reduce((sum, s) => sum + s.monthlyFee, 0) / students.length
-      )
+          students.reduce((sum, s) => sum + s.monthlyFee, 0) / students.length
+        )
 
   return (
     <AdminLayout title="Dashboard" showMonthSelector>
@@ -63,9 +86,9 @@ export default function DashboardPage() {
         </div>
 
         {/* TOP CARDS */}
-        <div className="grid text-green-600 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-          <Card title="Total Students" value={students.length} icon={Users} iconColor="text-red-600"/>
+          <Card title="Total Students" value={students.length} icon={Users} />
 
           <Card
             title="Paid This Month"
@@ -84,10 +107,47 @@ export default function DashboardPage() {
           />
 
           <Card
-            title="Collection"
-            value={`Rs. ${totalCollection.toLocaleString("en-IN")}`}
-            subtitle={`Total collected in ${selectedMonth}`}
+            title="Total Collection"
+            value={`₹ ${totalCollection.toLocaleString("en-IN")}`}
+            subtitle={`All modes in ${selectedMonth}`}
             icon={IndianRupee}
+            iconColor="text-blue-600"
+          />
+        </div>
+
+        {/* ONLINE / CASH CARDS */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+          <Card
+            title="Online Paid"
+            value={onlineCount}
+            subtitle={`${onlinePercent}% of paid`}
+            icon={CreditCard}
+            iconColor="text-emerald-600"
+          />
+
+          <Card
+            title="Cash Paid"
+            value={cashCount}
+            subtitle={`${cashPercent}% of paid`}
+            icon={Wallet}
+            iconColor="text-purple-600"
+          />
+
+          <Card
+            title="Online Collection"
+            value={`₹ ${onlineCollection.toLocaleString("en-IN")}`}
+            subtitle="Total online received"
+            icon={IndianRupee}
+            iconColor="text-emerald-600"
+          />
+
+          <Card
+            title="Cash Collection"
+            value={`₹ ${cashCollection.toLocaleString("en-IN")}`}
+            subtitle="Total cash received"
+            icon={IndianRupee}
+            iconColor="text-purple-600"
           />
         </div>
 
@@ -109,14 +169,14 @@ export default function DashboardPage() {
             <div className="rounded-lg bg-gray-50 p-4">
               <p className="text-sm text-muted-foreground">Pending Amount</p>
               <p className="text-2xl font-bold text-red-600">
-                Rs. {pendingAmount.toLocaleString("en-IN")}
+                ₹ {pendingAmount.toLocaleString("en-IN")}
               </p>
             </div>
 
             <div className="rounded-lg bg-gray-50 p-4">
               <p className="text-sm text-muted-foreground">Average Fee</p>
               <p className="text-2xl font-bold">
-                Rs. {avgFee.toLocaleString("en-IN")}
+                ₹ {avgFee.toLocaleString("en-IN")}
               </p>
             </div>
 

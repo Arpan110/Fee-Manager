@@ -13,7 +13,6 @@ import type { Month } from "./month-context"
 /* ===================== TYPES ===================== */
 
 export interface Student {
-  
   _id: string
   name: string
   studentId: string
@@ -31,6 +30,7 @@ export interface Payment {
   month: string
   year: number
   status: "PAID" | "UNPAID"
+  paymentMode?: "ONLINE" | "CASH"   // ✅ NEW
   amount: number
   paidAt?: string
 }
@@ -45,7 +45,8 @@ interface StudentStore {
   togglePaymentStatus: (
     studentId: string,
     month: Month,
-    amount: number
+    amount: number,
+    mode: "ONLINE" | "CASH"          // ✅ NEW
   ) => Promise<void>
 
   getStudentById: (id: string) => Student | undefined
@@ -54,6 +55,8 @@ interface StudentStore {
     total: number
     paid: number
     unpaid: number
+    online: number
+    cash: number
   }
 }
 
@@ -90,7 +93,6 @@ export function StudentStoreProvider({ children }: { children: ReactNode }) {
 
       setStudents(data)
 
-      // load payments for each student
       data.forEach((s: Student) => {
         fetchPaymentsForStudent(s._id)
       })
@@ -134,9 +136,14 @@ export function StudentStoreProvider({ children }: { children: ReactNode }) {
     [fetchStudents]
   )
 
-  /* ---------- REAL PAYMENT TOGGLE ---------- */
+  /* ---------- PAYMENT (ONLINE / CASH) ---------- */
   const togglePaymentStatus = useCallback(
-    async (studentId: string, month: Month, amount: number) => {
+    async (
+      studentId: string,
+      month: Month,
+      amount: number,
+      mode: "ONLINE" | "CASH"
+    ) => {
       try {
         await fetch(`/api/payments/${studentId}`, {
           method: "POST",
@@ -146,10 +153,10 @@ export function StudentStoreProvider({ children }: { children: ReactNode }) {
             year: new Date().getFullYear(),
             amount,
             status: "PAID",
+            paymentMode: mode, // ✅ NEW
           }),
         })
 
-        // refresh payments
         await fetchPaymentsForStudent(studentId)
       } catch (err) {
         console.error("Payment toggle failed", err)
@@ -175,6 +182,8 @@ export function StudentStoreProvider({ children }: { children: ReactNode }) {
       const total = active.length
 
       let paid = 0
+      let online = 0
+      let cash = 0
 
       active.forEach((s) => {
         const payments = paymentsMap[s._id] || []
@@ -184,10 +193,15 @@ export function StudentStoreProvider({ children }: { children: ReactNode }) {
             p.year === new Date().getFullYear() &&
             p.status === "PAID"
         )
-        if (found) paid++
+
+        if (found) {
+          paid++
+          if (found.paymentMode === "ONLINE") online++
+          if (found.paymentMode === "CASH") cash++
+        }
       })
 
-      return { total, paid, unpaid: total - paid }
+      return { total, paid, unpaid: total - paid, online, cash }
     },
     [students, paymentsMap]
   )

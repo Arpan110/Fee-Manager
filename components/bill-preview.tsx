@@ -11,6 +11,8 @@ interface BillPreviewProps {
   status: "paid" | "unpaid"
   receiptNo?: string
   amountInWords?: string
+  paymentMode?: "ONLINE" | "CASH"       // ✅ NEW
+  paidAt?: string                        // ✅ NEW
 }
 
 export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
@@ -21,6 +23,8 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
       status,
       receiptNo = `RCP-${Date.now()}`,
       amountInWords = "",
+      paymentMode,
+      paidAt,
     },
     ref
   ) {
@@ -30,6 +34,14 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
       year: "numeric",
     })
 
+    const paidDate = paidAt
+      ? new Date(paidAt).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+      : null
+
     return (
       <div
         ref={ref}
@@ -38,12 +50,7 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
         {/* 🌫 WATERMARK */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.06]">
           <div className="relative h-[420px] w-[420px]">
-            <Image
-              src="/logo.png"
-              alt="Watermark"
-              fill
-              className="object-contain"
-            />
+            <Image src="/logo.png" alt="Watermark" fill className="object-contain" />
           </div>
         </div>
 
@@ -53,22 +60,17 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
           <div className="flex justify-center border-b-2 border-blue-800 pb-3">
             <div className="flex items-center gap-4">
               <div className="relative h-16 w-16">
-                <Image
-                  src="/logo.png"
-                  alt="Logo"
-                  fill
-                  className="object-contain"
-                />
+                <Image src="/logo.png" alt="Logo" fill className="object-contain" />
               </div>
 
-              <div className="text-left leading-tight">
+              <div className="leading-tight text-center">
                 <h1 className="text-xl font-bold text-blue-900">
                   VIVEK VIKAS MISSION SCHOOL
                 </h1>
-                <p className="text-[11px] text-gray-700 text-center">
+                <p className="text-[11px] text-gray-700">
                   KHIRI * KOTULPUR * BANKURA * PIN - 722141
                 </p>
-                <p className="text-[11px] text-gray-700 text-center">
+                <p className="text-[11px] text-gray-700">
                   Phone: 8777393801
                 </p>
               </div>
@@ -85,6 +87,24 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
             <p><b>Receipt No:</b> {receiptNo}</p>
             <p><b>Date:</b> {currentDate}</p>
           </div>
+
+          {/* PAYMENT INFO */}
+          {status === "paid" && (
+            <div className="mt-2 flex justify-between text-[12px]">
+              <p>
+                <b>Payment Mode:</b>{" "}
+                <span className="font-semibold text-blue-800">
+                  {paymentMode || "—"}
+                </span>
+              </p>
+              <p>
+                <b>Paid On:</b>{" "}
+                <span className="font-semibold">
+                  {paidDate || currentDate}
+                </span>
+              </p>
+            </div>
+          )}
 
           {/* STUDENT DETAILS */}
           <div className="mt-4 border-t pt-2">
@@ -107,31 +127,40 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
                 <tr>
                   <th className="border px-2 py-1 text-left">Description</th>
                   <th className="border px-2 py-1 text-center">Month</th>
+                  <th className="border px-2 py-1 text-center">Status</th>
                   <th className="border px-2 py-1 text-right">Amount (Rs.)</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border px-2 py-1">Fees</td>
+                  <td className="border px-2 py-1">Monthly Fees</td>
                   <td className="border px-2 py-1 text-center">{month}</td>
+
+                  <td className="border px-2 py-1 text-center font-semibold">
+                    {status === "paid" ? (
+                      <span className="text-green-700">
+                        PAID {paymentMode ? `(${paymentMode})` : ""}
+                      </span>
+                    ) : (
+                      <span className="text-red-600">UNPAID</span>
+                    )}
+                  </td>
+
                   <td className="border px-2 py-1 text-right">
                     {student.monthlyFee.toLocaleString("en-IN")}
                   </td>
                 </tr>
 
                 <tr className="bg-blue-50 font-semibold">
-                  <td className="border px-2 py-1" colSpan={2}>Total</td>
+                  <td className="border px-2 py-1" colSpan={3}>Total</td>
                   <td className="border px-2 py-1 text-right">
                     {student.monthlyFee.toLocaleString("en-IN")}
                   </td>
                 </tr>
 
                 <tr>
-                  <td
-                    colSpan={3}
-                    className="border px-2 py-1 font-semibold text-blue-900"
-                  >
-                    Amount in Words: {amountInWords} Only
+                  <td colSpan={4} className="border px-2 py-1 font-semibold text-blue-900 bg-white">
+                    Amount in Words (Rupees): {amountInWords} Only
                   </td>
                 </tr>
               </tbody>
@@ -139,7 +168,7 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
           </div>
 
           {/* PAYMENT STATUS */}
-          <div className="mt-52 flex justify-center">
+          <div className="mt-52 flex flex-col items-center gap-2">
             <div
               className={
                 status === "paid"
@@ -149,18 +178,15 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
             >
               {status === "paid" ? "PAYMENT RECEIVED" : "PAYMENT PENDING"}
             </div>
+
+            
           </div>
 
           {/* SIGNATURE */}
           <div className="mt-12 flex justify-end">
             <div className="text-center">
               <div className="relative h-12 w-32">
-                <Image
-                  src="/signature.png"
-                  alt="Signature"
-                  fill
-                  className="object-contain"
-                />
+                <Image src="/signature.png" alt="Signature" fill className="object-contain" />
               </div>
               <p className="mt-1 text-[11px]">Receiver's Signature</p>
             </div>
@@ -168,7 +194,7 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
 
           {/* FOOTER */}
           <div className="mt-6 border-t pt-2 text-center text-[11px] text-gray-600">
-            <p>This is a computer-generated receipt. No signature required.</p>
+            <p>This is a computer-generated receipt.</p>
             <p>Thank you for your payment</p>
           </div>
 

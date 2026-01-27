@@ -12,6 +12,8 @@ interface Payment {
   year: number
   status: "PAID" | "UNPAID"
   amount: number
+  paymentMode?: "ONLINE" | "CASH"
+  paidAt?: string
 }
 
 /* 🔢 Number → Words */
@@ -79,14 +81,15 @@ export default function ReceiptPage() {
   if (!student) return <div className="p-6 text-red-600">Student not found</div>
 
   const currentYear = new Date().getFullYear()
-  const paid = payments.some(
+
+  const payment = payments.find(
     (p) =>
       p.month === selectedMonth &&
       p.year === currentYear &&
       p.status === "PAID"
   )
 
-  const status = paid ? "paid" : "unpaid"
+  const status = payment ? "paid" : "unpaid"
 
   /* 🖨 PRINT → SAVE AS PDF */
   const handleDownloadPDF = () => {
@@ -123,14 +126,14 @@ export default function ReceiptPage() {
       <div className="flex justify-between items-center print:hidden">
         <button
           onClick={() => router.back()}
-          className="px-4 py-2 border rounded bg-white"
+          className="px-4 py-2 border rounded bg-white hover:cursor-pointer"
         >
           ⬅ Back
         </button>
 
         <button
           onClick={handleDownloadPDF}
-          className="px-4 py-2 bg-black text-white rounded"
+          className="px-4 py-2 bg-black text-white rounded hover:cursor-pointer"
         >
           ⬇ Download PDF
         </button>
@@ -142,6 +145,8 @@ export default function ReceiptPage() {
           month={selectedMonth as any}
           status={status}
           amountInWords={numberToWords(student.monthlyFee)}
+          paymentMode={payment?.paymentMode}     // ✅ NEW
+          paidAt={payment?.paidAt}                // ✅ NEW
         />
       </div>
     </div>

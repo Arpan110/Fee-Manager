@@ -24,125 +24,150 @@ function MonthReportPreview({ students, month }: any) {
   const paidStudents = students.filter((s: any) => s.status === "paid")
   const unpaidStudents = students.filter((s: any) => s.status === "unpaid")
 
-  const totalCollection = paidStudents.reduce(
-    (sum: number, s: any) => sum + s.monthlyFee,
-    0
-  )
+  const onlineStudents = paidStudents.filter((s: any) => s.mode === "ONLINE")
+  const cashStudents = paidStudents.filter((s: any) => s.mode === "CASH")
+
+  const totalCollection = paidStudents.reduce((s: number, a: any) => s + a.monthlyFee, 0)
+  const onlineCollection = onlineStudents.reduce((s: number, a: any) => s + a.monthlyFee, 0)
+  const cashCollection = cashStudents.reduce((s: number, a: any) => s + a.monthlyFee, 0)
 
   return (
-    <div className="flex h-full flex-col">
-      {/* BODY */}
-      <div
-        id="report-content"
-        className="relative flex-1 bg-white p-8 overflow-y-auto print:overflow-visible"
-      >
-        {/* WATERMARK */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-5">
-          <Image src="/logo.png" alt="logo" width={350} height={350} />
-        </div>
+    <div
+      id="report-content"
+      className="relative bg-white p-8 min-h-full print:p-6"
+    >
+      {/* WATERMARK */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-5">
+        <Image src="/logo.png" alt="logo" width={350} height={350} />
+      </div>
 
-        <div className="relative z-10">
+      <div className="relative z-10">
 
-          {/* HEADER */}
-          <div className="mb-6 border-b-2 border-blue-800 pb-4 text-center">
-            <div className="flex items-center justify-center gap-3">
-              <Image src="/logo.png" alt="logo" width={70} height={70} />
-              <div>
-                <h1 className="text-2xl font-bold text-blue-900">
-                  Vivek Vikas Mission School
-                </h1>
-                <p className="text-sm text-gray-600">
-                  KHIRI • KOTULPUR • BANKURA • PIN - 722141
-                </p>
-                <p className="text-sm text-gray-600">Phone: 8777393801</p>
-              </div>
+        {/* HEADER */}
+        <div className="mb-6 border-b-2 border-blue-800 pb-4 text-center">
+          <div className="flex items-center justify-center gap-3">
+            <Image src="/logo.png" alt="logo" width={70} height={70} />
+            <div>
+              <h1 className="text-2xl font-bold text-blue-900">
+                Vivek Vikas Mission School
+              </h1>
+              <p className="text-sm text-gray-600">
+                KHIRI • KOTULPUR • BANKURA • PIN - 722141
+              </p>
+              <p className="text-sm text-gray-600">Phone: 8777393801</p>
             </div>
           </div>
+        </div>
 
-          {/* TITLE */}
-          <div className="mb-6 text-center">
-            <h2 className="text-xl font-bold">MONTHLY FEE COLLECTION REPORT</h2>
-            <p className="font-semibold text-blue-700">{month}</p>
-            <p className="text-sm text-gray-500">
-              Date: {new Date().toLocaleDateString("en-IN")}
+        {/* TITLE */}
+        <div className="mb-6 text-center">
+          <h2 className="text-xl font-bold">MONTHLY FEE COLLECTION REPORT</h2>
+          <p className="font-semibold text-blue-700">{month}</p>
+          <p className="text-sm text-gray-500">
+            Date: {new Date().toLocaleDateString("en-IN")}
+          </p>
+        </div>
+
+        {/* STATS */}
+        <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <Stat title="Total Students" value={students.length} />
+          <Stat title="Paid" value={paidStudents.length} color="text-green-600" />
+          <Stat title="Unpaid" value={unpaidStudents.length} color="text-red-600" />
+          <Stat
+            title="Total Collection"
+            value={`₹ ${totalCollection.toLocaleString("en-IN")}`}
+            color="text-blue-700"
+          />
+        </div>
+
+        {/* ONLINE / CASH */}
+        <div className="mb-6 flex justify-center gap-6">
+          <SmallStat
+            title="Online Paid"
+            value={onlineStudents.length}
+            amount={`₹ ${onlineCollection.toLocaleString("en-IN")}`}
+            color="text-indigo-600"
+          />
+          <SmallStat
+            title="Cash Paid"
+            value={cashStudents.length}
+            amount={`₹ ${cashCollection.toLocaleString("en-IN")}`}
+            color="text-orange-600"
+          />
+        </div>
+
+        {/* TABLE */}
+        <table className="w-full border border-gray-400 border-collapse text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border border-gray-400 p-2">SL.No.</th>
+              <th className="border border-gray-400 p-2">Name</th>
+              <th className="border border-gray-400 p-2">Roll No.</th>
+              <th className="border border-gray-400 p-2">Class</th>
+              <th className="border border-gray-400 p-2">Village</th>
+              <th className="border border-gray-400 p-2 text-right">Fee</th>
+              <th className="border border-gray-400 p-2 text-center">Status</th>
+              <th className="border border-gray-400 p-2 text-center">Mode</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {students.map((s: any, i: number) => (
+              <tr key={s.studentId} className="break-inside-avoid">
+                <td className="border border-gray-400 p-2">{i + 1}</td>
+                <td className="border border-gray-400 p-2">{s.name}</td>
+                <td className="border border-gray-400 p-2">{s.studentId}</td>
+                <td className="border border-gray-400 p-2">{s.class}</td>
+                <td className="border border-gray-400 p-2">{s.village}</td>
+                <td className="border border-gray-400 p-2 text-right">₹ {s.monthlyFee}</td>
+                <td className={`border border-gray-400 p-2 text-center font-bold ${s.status === "paid" ? "text-green-600" : "text-red-600"}`}>
+                  {s.status.toUpperCase()}
+                </td>
+                <td className="border border-gray-400 p-2 text-center font-semibold">
+                  {s.mode || "-"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {/* SIGNATURE */}
+        <div className="mt-20 flex justify-end break-inside-avoid">
+          <div className="text-center">
+            <Image
+              src="/signature.png"
+              alt="signature"
+              width={150}
+              height={80}
+            />
+            <p className="mt-1 border-t pt-1 text-sm font-semibold">
+              Principal Signature
             </p>
           </div>
-
-          {/* STATS */}
-          <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Stat title="Total Students" value={students.length} />
-            <Stat title="Paid" value={paidStudents.length} color="text-green-600" />
-            <Stat title="Unpaid" value={unpaidStudents.length} color="text-red-600" />
-            <Stat
-              title="Collection"
-              value={`₹ ${totalCollection.toLocaleString("en-IN")}`}
-              color="text-blue-700"
-            />
-          </div>
-
-          {/* ✅ SCREEN: scroll | PRINT: full table */}
-          <div className="border rounded-md max-h-[420px] overflow-y-auto print:max-h-full print:overflow-visible">
-            <table className="w-full border-collapse border text-sm">
-              <thead className="sticky top-0 bg-gray-100 print:static">
-                <tr>
-                  <th className="border p-2">S.No</th>
-                  <th className="border p-2">Name</th>
-                  <th className="border p-2">ID</th>
-                  <th className="border p-2">Class</th>
-                  <th className="border p-2">Village</th>
-                  <th className="border p-2 text-right">Fee</th>
-                  <th className="border p-2 text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((s: any, i: number) => (
-                  <tr key={s.studentId} className="break-inside-avoid">
-                    <td className="border p-2">{i + 1}</td>
-                    <td className="border p-2">{s.name}</td>
-                    <td className="border p-2">{s.studentId}</td>
-                    <td className="border p-2">{s.class}</td>
-                    <td className="border p-2">{s.village}</td>
-                    <td className="border p-2 text-right">
-                      ₹ {s.monthlyFee.toLocaleString("en-IN")}
-                    </td>
-                    <td
-                      className={`border p-2 text-center font-bold ${
-                        s.status === "paid" ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {s.status.toUpperCase()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* SIGNATURE */}
-          <div className="mt-24 flex justify-end break-inside-avoid">
-            <div className="text-center">
-              <Image
-                src="/signature.png"
-                alt="signature"
-                width={150}
-                height={80}
-              />
-              <p className="mt-1 border-t pt-1 text-sm font-semibold">
-                Principal Signature
-              </p>
-            </div>
-          </div>
         </div>
+
+
       </div>
     </div>
   )
 }
+
+/* ---------- SMALL COMPONENTS ---------- */
 
 function Stat({ title, value, color = "" }: any) {
   return (
     <div className="rounded-lg border p-3 text-center">
       <p className="text-sm text-muted-foreground">{title}</p>
       <p className={`text-2xl font-bold ${color}`}>{value}</p>
+    </div>
+  )
+}
+
+function SmallStat({ title, value, amount, color }: any) {
+  return (
+    <div className="rounded-lg border px-4 py-2 text-center min-w-[140px]">
+      <p className="text-xs text-muted-foreground">{title}</p>
+      <p className={`text-lg font-bold ${color}`}>{value}</p>
+      <p className="text-xs font-semibold text-gray-600">{amount}</p>
     </div>
   )
 }
@@ -155,6 +180,7 @@ function StudentsContent() {
   const [searchQuery, setSearchQuery] = useState("")
   const [showReport, setShowReport] = useState(false)
 
+  const currentYear = new Date().getFullYear()
   const activeStudents = getActiveStudents()
 
   const filteredStudents = activeStudents.filter(
@@ -164,15 +190,10 @@ function StudentsContent() {
       s.phone?.includes(searchQuery)
   )
 
-  const currentYear = new Date().getFullYear()
-
   const reportData = filteredStudents.map((s: any) => {
     const payments = paymentsMap[s._id] || []
     const paid = payments.find(
-      (p: any) =>
-        p.month === selectedMonth &&
-        p.year === currentYear &&
-        p.status === "PAID"
+      (p: any) => p.month === selectedMonth && p.year === currentYear && p.status === "PAID"
     )
 
     return {
@@ -182,10 +203,11 @@ function StudentsContent() {
       village: s.village,
       monthlyFee: s.monthlyFee,
       status: paid ? "paid" : "unpaid",
+      mode: paid?.paymentMode || null,
     }
   })
 
-  /* ✅ PERFECT PRINT */
+  /* ✅ PRINT */
   const handlePrintReport = () => {
     const printContent = document.getElementById("report-content")
     if (!printContent) return
@@ -200,7 +222,6 @@ function StudentsContent() {
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
             @media print {
-              * { overflow: visible !important; }
               table { page-break-inside: auto; }
               tr { page-break-inside: avoid; }
               thead { display: table-header-group; }
@@ -208,7 +229,7 @@ function StudentsContent() {
           </style>
         </head>
         <body>
-          ${printContent.innerHTML}
+          ${printContent.outerHTML}
         </body>
       </html>
     `)
@@ -244,7 +265,11 @@ function StudentsContent() {
             </Link>
           </Button>
 
-          <Button variant="outline" onClick={() => setShowReport(true)}>
+          <Button
+            variant="outline"
+            onClick={() => setShowReport(true)}
+            className="cursor-pointer hover:bg-gray-100 hover:border-primary hover:shadow-sm transition"
+          >
             <FileDown className="mr-2 h-5 w-5" />
             Download Report
           </Button>
@@ -257,20 +282,27 @@ function StudentsContent() {
         onDeleteStudent={deleteStudent}
       />
 
-      {/* REPORT MODAL */}
+      {/* MODAL */}
       <Dialog open={showReport} onOpenChange={setShowReport}>
-        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 overflow-hidden">
+        <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 overflow-hidden">
           <DialogHeader className="border-b px-6 py-4 flex items-center justify-between">
             <DialogTitle className="text-xl text-primary">
               Monthly Report - {selectedMonth}
             </DialogTitle>
 
-            <Button size="sm" variant="outline" onClick={handlePrintReport}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handlePrintReport}
+              className="cursor-pointer hover:bg-gray-100"
+            >
               <Printer className="mr-2 h-4 w-4" /> Print
             </Button>
           </DialogHeader>
 
-          <MonthReportPreview students={reportData} month={selectedMonth} />
+          <div className="flex-1 overflow-y-auto">
+            <MonthReportPreview students={reportData} month={selectedMonth} />
+          </div>
         </DialogContent>
       </Dialog>
     </div>
