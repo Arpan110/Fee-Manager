@@ -11,8 +11,8 @@ interface BillPreviewProps {
   status: "paid" | "unpaid"
   receiptNo?: string
   amountInWords?: string
-  paymentMode?: "ONLINE" | "CASH"       // ✅ NEW
-  paidAt?: string                        // ✅ NEW
+  paymentMode?: "ONLINE" | "CASH"
+  paidAt?: string
 }
 
 export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
@@ -36,16 +36,17 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
 
     const paidDate = paidAt
       ? new Date(paidAt).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      })
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        })
       : null
 
     return (
       <div
         ref={ref}
-        className="relative mx-auto w-full max-w-3xl bg-white px-10 py-8 text-[13px] text-black"
+        className="relative mx-auto w-full max-w-3xl bg-white px-10 py-8 text-[13px] text-black
+                   print:break-inside-avoid print:page-break-inside-avoid"
       >
         {/* 🌫 WATERMARK */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.06]">
@@ -122,21 +123,21 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
           <div className="mt-5 border-t pt-2">
             <p className="mb-2 font-semibold text-blue-900">FEE DETAILS</p>
 
-            <table className="w-full border border-gray-400 text-[12px]">
+            <table className="w-full border border-gray-500 border-collapse text-[12px]">
               <thead className="bg-blue-50">
                 <tr>
-                  <th className="border px-2 py-1 text-left">Description</th>
-                  <th className="border px-2 py-1 text-center">Month</th>
-                  <th className="border px-2 py-1 text-center">Status</th>
-                  <th className="border px-2 py-1 text-right">Amount (Rs.)</th>
+                  <th className="border border-gray-500 px-2 py-1 text-left">Description</th>
+                  <th className="border border-gray-500 px-2 py-1 text-center">Month</th>
+                  <th className="border border-gray-500 px-2 py-1 text-center">Status</th>
+                  <th className="border border-gray-500 px-2 py-1 text-right">Amount (Rs.)</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border px-2 py-1">Monthly Fees</td>
-                  <td className="border px-2 py-1 text-center">{month}</td>
+                  <td className="border border-gray-500 px-2 py-1">Monthly Fees</td>
+                  <td className="border border-gray-500 px-2 py-1 text-center">{month}</td>
 
-                  <td className="border px-2 py-1 text-center font-semibold">
+                  <td className="border border-gray-500 px-2 py-1 text-center font-semibold">
                     {status === "paid" ? (
                       <span className="text-green-700">
                         PAID {paymentMode ? `(${paymentMode})` : ""}
@@ -146,20 +147,20 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
                     )}
                   </td>
 
-                  <td className="border px-2 py-1 text-right">
+                  <td className="border border-gray-500 px-2 py-1 text-right">
                     {student.monthlyFee.toLocaleString("en-IN")}
                   </td>
                 </tr>
 
                 <tr className="bg-blue-50 font-semibold">
-                  <td className="border px-2 py-1" colSpan={3}>Total</td>
-                  <td className="border px-2 py-1 text-right">
+                  <td className="border border-gray-500 px-2 py-1" colSpan={3}>Total</td>
+                  <td className="border border-gray-500 px-2 py-1 text-right">
                     {student.monthlyFee.toLocaleString("en-IN")}
                   </td>
                 </tr>
 
                 <tr>
-                  <td colSpan={4} className="border px-2 py-1 font-semibold text-blue-900 bg-white">
+                  <td colSpan={4} className="border border-gray-500 px-2 py-1 font-semibold text-blue-900 bg-white">
                     Amount in Words (Rupees): {amountInWords} Only
                   </td>
                 </tr>
@@ -168,7 +169,7 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
           </div>
 
           {/* PAYMENT STATUS */}
-          <div className="mt-52 flex flex-col items-center gap-2">
+          <div className="mt-12 flex flex-col items-center gap-2">
             <div
               className={
                 status === "paid"
@@ -178,12 +179,10 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
             >
               {status === "paid" ? "PAYMENT RECEIVED" : "PAYMENT PENDING"}
             </div>
-
-            
           </div>
 
           {/* SIGNATURE */}
-          <div className="mt-12 flex justify-end">
+          <div className="mt-14 flex justify-end">
             <div className="text-center">
               <div className="relative h-12 w-32">
                 <Image src="/signature.png" alt="Signature" fill className="object-contain" />

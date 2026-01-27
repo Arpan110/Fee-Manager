@@ -96,7 +96,6 @@ export default function ReceiptPage() {
     if (!billRef.current) return
 
     const clone = billRef.current.cloneNode(true) as HTMLElement
-    clone.querySelectorAll(".bill-watermark").forEach((el) => el.remove())
 
     const win = window.open("", "_blank")
     if (!win) return alert("Popup blocked")
@@ -106,7 +105,20 @@ export default function ReceiptPage() {
         <head>
           <title>Fee Receipt</title>
           <script src="https://cdn.tailwindcss.com"></script>
-          <style>body{background:white;padding:30px}</style>
+          <style>
+            body { background: white; padding: 20px; }
+
+            @media print {
+              .receipt-page {
+                page-break-inside: avoid;
+                break-inside: avoid;
+              }
+
+              table, tr, td, th {
+                page-break-inside: avoid !important;
+              }
+            }
+          </style>
         </head>
         <body>
           ${clone.outerHTML}
@@ -139,14 +151,15 @@ export default function ReceiptPage() {
         </button>
       </div>
 
-      <div ref={billRef}>
+      {/* ✅ IMPORTANT WRAPPER */}
+      <div ref={billRef} className="receipt-page">
         <BillPreview
           student={student}
           month={selectedMonth as any}
           status={status}
           amountInWords={numberToWords(student.monthlyFee)}
-          paymentMode={payment?.paymentMode}     // ✅ NEW
-          paidAt={payment?.paidAt}                // ✅ NEW
+          paymentMode={payment?.paymentMode}
+          paidAt={payment?.paidAt}
         />
       </div>
     </div>
