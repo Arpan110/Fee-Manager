@@ -97,7 +97,8 @@ function MonthReportPreview({ students, month }: any) {
         </div>
 
         {/* TABLE */}
-        <table className="w-full border border-gray-400 border-collapse text-sm">
+        <div className="w-full overflow-x-auto">
+        <table className="min-w-175 w-full border border-gray-400 border-collapse text-sm">
           <thead className="bg-gray-100">
             <tr>
               <th className="border border-gray-400 p-2">SL.No.</th>
@@ -130,6 +131,7 @@ function MonthReportPreview({ students, month }: any) {
             ))}
           </tbody>
         </table>
+        </div>
         {/* SIGNATURE */}
         <div className="mt-20 flex justify-end break-inside-avoid">
           <div className="text-center">
@@ -164,7 +166,7 @@ function Stat({ title, value, color = "" }: any) {
 
 function SmallStat({ title, value, amount, color }: any) {
   return (
-    <div className="rounded-lg border px-4 py-2 text-center min-w-[140px]">
+    <div className="rounded-lg border px-4 py-2 text-center min-w-35">
       <p className="text-xs text-muted-foreground">{title}</p>
       <p className={`text-lg font-bold ${color}`}>{value}</p>
       <p className="text-xs font-semibold text-gray-600">{amount}</p>

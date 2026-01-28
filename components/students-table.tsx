@@ -39,133 +39,154 @@ export function StudentsTable({
 
   return (
     <div className="rounded-lg border bg-white">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Roll No.</TableHead>
-            <TableHead>Class</TableHead>
-            <TableHead>Village</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Monthly Fee</TableHead>
-            <TableHead className="text-center">Status</TableHead>
-            <TableHead className="text-center">Bill</TableHead>
-            <TableHead className="text-center">Delete</TableHead>
-          </TableRow>
-        </TableHeader>
 
-        <TableBody>
-          {students.map((student) => {
-            const payments = paymentsMap[student._id] || []
+      {/* ✅ MOBILE FIX: horizontal scroll */}
+      <div className="w-full overflow-x-auto">
+        <Table className="min-w-225">
 
-            const payment = payments.find(
-              (p) =>
-                p.month === selectedMonth &&
-                p.year === currentYear
-            )
+          <TableHeader>
+            <TableRow>
+              <TableHead className="px-2 py-2 sm:px-4">Name</TableHead>
+              <TableHead className="px-2 py-2 sm:px-4">Roll No.</TableHead>
+              <TableHead className="px-2 py-2 sm:px-4">Class</TableHead>
+              <TableHead className="px-2 py-2 sm:px-4">Village</TableHead>
+              <TableHead className="px-2 py-2 sm:px-4">Phone</TableHead>
+              <TableHead className="px-2 py-2 sm:px-4">Monthly Fee</TableHead>
+              <TableHead className="text-center px-2 py-2 sm:px-4">Status</TableHead>
+              <TableHead className="text-center px-2 py-2 sm:px-4">Bill</TableHead>
+              <TableHead className="text-center px-2 py-2 sm:px-4">Delete</TableHead>
+            </TableRow>
+          </TableHeader>
 
-            const isPaid = payment?.status === "PAID"
-            const mode = payment?.paymentMode // ONLINE | CASH
+          <TableBody>
+            {students.map((student) => {
+              const payments = paymentsMap[student._id] || []
 
-            return (
-              <TableRow key={student._id}>
-                <TableCell>{student.name}</TableCell>
-                <TableCell>{student.studentId}</TableCell>
-                <TableCell>{student.className}</TableCell>
-                <TableCell>{student.village}</TableCell>
-                <TableCell>{student.phone}</TableCell>
-                <TableCell>₹ {student.monthlyFee}</TableCell>
+              const payment = payments.find(
+                (p) =>
+                  p.month === selectedMonth &&
+                  p.year === currentYear
+              )
 
-                {/* ✅ PAYMENT */}
-                <TableCell className="text-center">
-                  <div className="flex flex-col items-center gap-2">
+              const isPaid = payment?.status === "PAID"
+              const mode = payment?.paymentMode
 
-                    {/* PAID / UNPAID */}
-                    <div
-                      className={`px-3 py-1 rounded-full text-xs font-bold border transition ${isPaid
-                        ? "bg-emerald-100 text-emerald-700 border-emerald-400 shadow-sm"
-                        : "bg-rose-100 text-rose-600 border-rose-400"
+              return (
+                <TableRow key={student._id}>
+
+                  <TableCell className="px-2 py-2 sm:px-4 whitespace-nowrap">
+                    {student.name}
+                  </TableCell>
+
+                  <TableCell className="px-2 py-2 sm:px-4 whitespace-nowrap">
+                    {student.studentId}
+                  </TableCell>
+
+                  <TableCell className="px-2 py-2 sm:px-4 whitespace-nowrap">
+                    {student.className}
+                  </TableCell>
+
+                  <TableCell className="px-2 py-2 sm:px-4">
+                    {student.village}
+                  </TableCell>
+
+                  <TableCell className="px-2 py-2 sm:px-4 whitespace-nowrap">
+                    {student.phone}
+                  </TableCell>
+
+                  <TableCell className="px-2 py-2 sm:px-4 whitespace-nowrap">
+                    ₹ {student.monthlyFee}
+                  </TableCell>
+
+                  {/* ✅ PAYMENT */}
+                  <TableCell className="text-center px-2 py-2 sm:px-4">
+                    <div className="flex flex-col items-center gap-2">
+
+                      <div
+                        className={`px-3 py-1 rounded-full text-[11px] font-bold border
+                        ${isPaid
+                          ? "bg-emerald-100 text-emerald-700 border-emerald-400"
+                          : "bg-rose-100 text-rose-600 border-rose-400"
                         }`}
-                    >
-                      {isPaid ? "PAID" : "UNPAID"}
-                    </div>
+                      >
+                        {isPaid ? "PAID" : "UNPAID"}
+                      </div>
 
-                    {/* ONLINE / CASH */}
-                    <div className="flex gap-2">
-                      <button
-                        disabled={!!payment}
-                        onClick={() =>
-                          togglePaymentStatus(
-                            student._id,
-                            selectedMonth as any,
-                            student.monthlyFee,
-                            "ONLINE"
-                          )
-                        }
-                        className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 hover:cursor-pointer
+                      <div className="flex gap-2">
+                        <button
+                          disabled={!!payment}
+                          onClick={() =>
+                            togglePaymentStatus(
+                              student._id,
+                              selectedMonth as any,
+                              student.monthlyFee,
+                              "ONLINE"
+                            )
+                          }
+                          className={`px-3 py-1 rounded-full text-[11px] font-semibold border transition hover:cursor-pointer
                           ${mode === "ONLINE"
-                            ? "bg-slate-800 text-white shadow-md shadow-slate-400/40 ring-2 ring-slate-500 hover:bg-slate-900"
-                            : "border-slate-400 text-slate-700 hover:bg-slate-100 hover:cursor-pointer"
+                            ? "bg-slate-800 text-white"
+                            : "border-slate-400 text-slate-700 hover:bg-slate-100"
                           }`}
-                      >
-                        ONLINE
-                      </button>
+                        >
+                          ONLINE
+                        </button>
 
-                      <button
-                        disabled={!!payment}
-                        onClick={() =>
-
-                          togglePaymentStatus(
-                            student._id,
-                            selectedMonth as any,
-                            student.monthlyFee,
-                            "CASH"
-                          )
-                        }
-                        className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 hover:cursor-pointer
+                        <button
+                          disabled={!!payment}
+                          onClick={() =>
+                            togglePaymentStatus(
+                              student._id,
+                              selectedMonth as any,
+                              student.monthlyFee,
+                              "CASH"
+                            )
+                          }
+                          className={`px-3 py-1 rounded-full text-[11px] font-semibold border transition hover:cursor-pointer
                           ${mode === "CASH"
-                            ? "bg-purple-500 text-white shadow-lg shadow-purple-300/60 ring-2 ring-purple-400"
+                            ? "bg-purple-500 text-white"
                             : "border-purple-400 text-purple-700 hover:bg-purple-50"
-
                           }`}
-                      >
-                        CASH
-                      </button>
+                        >
+                          CASH
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </TableCell>
+                  </TableCell>
 
-                {/* BILL */}
-                <TableCell className="text-center">
-                  {isPaid ? (
-                    <Button asChild size="sm" variant="outline">
-                      <Link
-                        href={`/receipt/${student._id}?month=${selectedMonth}&year=${currentYear}`}
-                      >
-                        <FileDown className="mr-1 h-4 w-4" />
-                        Bill
-                      </Link>
+                  {/* BILL */}
+                  <TableCell className="text-center px-2 py-2 sm:px-4 whitespace-nowrap">
+                    {isPaid ? (
+                      <Button asChild size="sm" variant="outline">
+                        <Link
+                          href={`/receipt/${student._id}?month=${selectedMonth}&year=${currentYear}`}
+                        >
+                          <FileDown className="mr-1 h-4 w-4" />
+                          Bill
+                        </Link>
+                      </Button>
+                    ) : (
+                      <span className="text-red-600 font-semibold">Due</span>
+                    )}
+                  </TableCell>
+
+                  {/* DELETE */}
+                  <TableCell className="text-center px-2 py-2 sm:px-4">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => onDeleteStudent(student._id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
-                  ) : (
-                    <span className="text-red-600 font-semibold">Due</span>
-                  )}
-                </TableCell>
+                  </TableCell>
 
-                {/* DELETE */}
-                <TableCell className="text-center">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => onDeleteStudent(student._id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }

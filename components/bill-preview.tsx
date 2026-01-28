@@ -169,7 +169,7 @@ export const BillPreview = forwardRef<HTMLDivElement, BillPreviewProps>(
           </div>
 
           {/* PAYMENT STATUS */}
-          <div className="mt-12 flex flex-col items-center gap-2">
+          <div className="mt-40 flex flex-col items-center gap-2">
             <div
               className={
                 status === "paid"
